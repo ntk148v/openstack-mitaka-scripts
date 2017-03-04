@@ -1,0 +1,131 @@
+#!/bin/bash
+# 
+# Unattended installer for Openstack
+# Kien Nguyen
+# 
+# Environments config
+# Version 1.0.0
+# 10/03/2017
+#
+
+PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+
+if [ -f /etc/openstack-control-script-config/main-config.rc ]
+then
+	source /etc/openstack-control-script-config/main-config.rc
+else
+	echo "Can't access my config file. Aborting !"
+	echo ""
+	exit 0
+fi
+
+configure_name_resolution()
+{
+	echo "### 1. Hostname config"
+	echo "$CONTROLLER_NODES 	controller" >> /etc/hosts
+	count=1
+	for COMPUTE_NODE in $COMPUTE_NODES
+	do
+		echo "$COMPUTE_NODE 	compute$count" >> /etc/hosts
+		count=$((count+1))
+	done
+	echo "### Configure name resolution is Done!"
+}
+
+install_configure_ntp()
+{
+	echo "### 2. Install ntp-chrony"
+	yum install chrony wget -y
+	if [ $? -eq 0 ]
+	then
+		sed -i '/server/d' /etc/chrony.conf
+		echo "server $NTP_SERVER iburst" >> /etc/chrony.conf
+		systemctl enable chronyd.service
+		systemctl start chronyd.service
+		chronyc sources
+	else
+		clear
+		echo '### Error: install chrony'
+	fi
+}
+
+install_openstack_packages()
+{
+	echo "### 3. Enable the OpenStack repository"
+	yum -y install centos-release-openstack-mitaka
+	yum -y update
+	yum -y upgrade
+	yum -y install python-openstackclient openstack-selinux crudini
+}
+
+install_configure_sql_database()
+{
+	echo "### 4. Install and configure MariaDB"
+	yum -y install mariadb mariadb-server python2-PyMySQL
+	if [ $? -eq 0 ]
+	then
+		touch /etc/my.cnf.d/openstack.cnf
+		crudini --set /etc/my.cnf.d/openstack.cnf mysqld bind-address $CONTROLLER_NODES
+		crudini --set /etc/my.cnf.d/openstack.cnf mysqld default-storage-engine innodb
+		crudini --set /etc/my.cnf.d/openstack.cnf mysqld innodb_file_per_table
+		crudini --set /etc/my.cnf.d/openstack.cnf mysqld max_connections 4096
+		crudini --set /etc/my.cnf.d/openstack.cnf mysqld collation-server utf8_general_ci
+		crudini --set /etc/my.cnf.d/openstack.cnf mysqld character-set-server utf8
+		systemctl enable mariadb.service
+		systemctl start mariadb.service
+	 	/usr/bin/mysqladmin -u $MYSQLDB_ADMIN password $MYSQLDB_PASSWORD > /dev/null 2>&1
+	 	rm /root/.my.cnf
+	 	echo "[client]" > /root/.my.cnf
+		echo "user=$MYSQLDB_ADMIN" >> /root/.my.cnf
+		echo "password=$MYSQLDB_PASSWORD" >> /root/.my.cnf
+		echo "GRANT ALL PRIVILEGES ON *.* TO '$MYSQLDB_ADMIN'@'%' IDENTIFIED BY '$MYSQLDB_PASSWORD' WITH GRANT OPTION;"|mysql
+		echo "FLUSH PRIVILEGES;"|mysql
+	 	iptables -A INPUT -p tcp -m multiport --dports $MYSQLDB_PORTL -j ACCEPT
+		service iptables save
+	else
+		clear
+		echo '### Error: install MariaDB'
+	fi
+}
+
+install_rabbitmq()
+{
+	echo "### 5. Install and create user with RabbitMQ"
+	yum -y install rabbitmq-server
+	if [ $? -eq 0 ]
+	then
+		systemctl enable rabbitmq-server.service
+		systemctl start rabbitmq-server.service
+		rabbitmqctl add_user $RABBIT_USER $RABBIT_PASS
+		rabbitmqctl set_permissions openstack ".*" ".*" ".*"
+		echo "### Create user $RABBIT_USER with password: $RABBIT_PASS"
+	else
+		clear
+		echo '### Error: install RabbitMQ'
+	fi
+}
+
+install_memcaced()
+{
+	echo "### 6. Install and create user with memcached"
+	yum -y install memcached python-memcached
+	if [ $? -eq 0 ]
+	then
+		systemctl enable memcached.service
+		systemctl start memcached.service
+	else
+		clear
+		echo '### Error: install memcached'
+	fi
+}
+
+main(){
+	configure_name_resolution
+	install_configure_ntp
+	install_openstack_packages
+	install_configure_sql_database
+	install_rabbitmq
+	install_memcaced
+}
+
+main

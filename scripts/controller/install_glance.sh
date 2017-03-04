@@ -1,0 +1,187 @@
+#!/bin/bash
+# 
+# Unattended installer for Openstack
+# Kien Nguyen
+# 
+# Install Glance script
+# Version 1.0.0
+# 10/03/2017
+#
+
+PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+
+if [ -f /etc/openstack-control-script-config/main-config.rc ]
+then
+	source /etc/openstack-control-script-config/main-config.rc
+else
+	echo "### Can't access my config file. Aborting !"
+	echo ""
+	exit 0
+fi
+
+if [ -f /etc/openstack-control-script-config/glance-installed ]
+then
+	echo ""
+	echo "### This module was already completed. Exiting !"
+	echo ""
+	exit 0
+fi
+
+create_database()
+{
+	MYSQL_COMMAND="mysql --port=$MYSQLDB_PORT --password=$MYSQLDB_PASSWORD --user=$MYSQLDB_ADMIN --host=controller"
+	echo "### 1. Creating Glance database"
+	echo "CREATE DATABASE $GLANCE_DBNAME;"|$MYSQL_COMMAND
+	echo "GRANT ALL PRIVILEGES ON $GLANCE_DBNAME.* TO '$GLANCE_DBUSER'@'localhost' IDENTIFIED BY '$GLANCE_DBPASS';"|$MYSQL_COMMAND
+	echo "GRANT ALL PRIVILEGES ON $GLANCE_DBNAME.* TO '$GLANCE_DBUSER'@'%' IDENTIFIED BY '$GLANCE_DBPASS';"|$MYSQL_COMMAND
+	echo "FLUSH PRIVILEGES;"|$MYSQL_COMMAND
+	sync
+	sleep 5
+	sync
+}
+
+create_glance_identity()
+{
+	source $ADMIN_RC_FILE
+	echo "### 2. Create Glance user, service and endpoint"
+	if [ -f date > /etc/openstack-control-script-config/keystone-extra-idents-glance ]
+	then
+		echo ""
+		echo "### Glance Identity was Done. Pass!"
+		echo ""
+	else
+		echo "- Glance User"
+		openstack user create $GLANCE_USER --domain default \
+			--password $GLANCE_PASS
+		openstack role add --project service --user $GLANCE_USER admin
+		echo "- Glance Service"
+		openstack service create --name $GLANCE_SERVICE \
+			--description "OpenStack Image" image
+		echo "- Glance Endpoints"
+		openstack endpoint create --region RegionOne \
+	  		image public http://controller:9292
+	  	openstack endpoint create --region RegionOne \
+	  		image internal http://controller:9292
+	  	openstack endpoint create --region RegionOne \
+	 		image admin http://controller:9292
+	 	date > /etc/openstack-control-script-config/keystone-extra-idents-glance
+	 	echo ""
+		echo "### Glance Identity is Done"
+		echo ""
+		sync
+		sleep 5
+		sync
+	fi
+}
+
+install_configure_glance()
+{
+ 	echo "### 3. Install Glance and Configure Glance configuration"
+	#
+	# Install glance package
+	# 
+ 	yum -y install openstack-glance
+ 	#
+ 	# Using crudini we proceed to configure glance service
+ 	#
+ 	crudini --set /etc/glance/glance-api.conf DEFAULT debug False
+ 	crudini --set /etc/glance/glance-api.conf glance_store default_store file
+	crudini --set /etc/glance/glance-api.conf glance_store stores "file,http"
+	crudini --set /etc/glance/glance-api.conf glance_store filesystem_store_datadir /var/lib/glance/images/
+	crudini --set /etc/glance/glance-api.conf DEFAULT bind_host 0.0.0.0
+	crudini --set /etc/glance/glance-api.conf DEFAULT bind_port 9292
+	crudini --set /etc/glance/glance-api.conf DEFAULT log_file /var/log/glance/api.log
+	crudini --set /etc/glance/glance-api.conf DEFAULT backlog 4096
+	crudini --set /etc/glance/glance-api.conf DEFAULT use_syslog False
+ 	crudini --set /etc/glance/glance-api.conf database connection mysql+pymysql://$GLANCE_DBUSER:$GLANCE_DBPASS@controller/$GLANCE_DBNAME
+ 	crudini --set /etc/glance/glance-registry.conf database connection mysql+pymysql://$GLANCE_DBUSER:$GLANCE_DBPASS@controller/$GLANCE_DBNAME
+
+ 	crudini --set /etc/glance/glance-api.conf keystone_authtoken auth_uri http://controller:5000
+	crudini --set /etc/glance/glance-api.conf keystone_authtoken auth_url http://controller:35357
+	crudini --set /etc/glance/glance-api.conf keystone_authtoken auth_type password
+	crudini --set /etc/glance/glance-api.conf keystone_authtoken memcached_servers controller:11211
+	crudini --set /etc/glance/glance-api.conf keystone_authtoken project_domain_name default
+	crudini --set /etc/glance/glance-api.conf keystone_authtoken user_domain_name default
+	crudini --set /etc/glance/glance-api.conf keystone_authtoken project_name service
+	crudini --set /etc/glance/glance-api.conf keystone_authtoken username $GLANCE_USER
+	crudini --set /etc/glance/glance-api.conf keystone_authtoken password $GLANCE_PASS
+
+	crudini --set /etc/glance/glance-registry.conf keystone_authtoken auth_uri http://controller:5000
+	crudini --set /etc/glance/glance-registry.conf keystone_authtoken auth_url http://controller:35357
+	crudini --set /etc/glance/glance-registry.conf keystone_authtoken auth_type password
+	crudini --set /etc/glance/glance-registry.conf keystone_authtoken memcached_servers controller:11211
+	crudini --set /etc/glance/glance-registry.conf keystone_authtoken project_domain_name default
+	crudini --set /etc/glance/glance-registry.conf keystone_authtoken user_domain_name default
+	crudini --set /etc/glance/glance-registry.conf keystone_authtoken project_name service
+	crudini --set /etc/glance/glance-registry.conf keystone_authtoken username $GLANCE_USER
+	crudini --set /etc/glance/glance-registry.conf keystone_authtoken password $GLANCE_PASS
+
+	crudini --set /etc/glance/glance-api.conf paste_deploy flavor keystone
+	crudini --set /etc/glance/glance-registry.conf paste_deploy flavor keystone
+
+	sync
+	sleep 5
+	sync
+	
+	echo ""
+	echo "### 4. Populate the Image service db"
+	echo ""
+	su -s /bin/sh -c "glance-manage db_sync" glance
+	if [ $check -gt 2 ]
+	then
+		echo ""
+		echo "### Import Database Glance: OK"
+		echo ""
+	else
+		echo ""
+		echo "### Error: Import Database Glance"
+		echo ""
+	fi
+	clear
+
+	systemctl enable openstack-glance-api.service \
+		openstack-glance-registry.service
+	systemctl start openstack-glance-api.service \
+ 		openstack-glance-registry.service
+ 	echo ""
+	echo "### Glance Installed and Configured"
+	echo ""
+
+	sync
+	sleep 5
+	sync
+}
+
+verify_glance()
+{
+	echo ""
+	echo "### 5. Verify Glance installation"
+	echo ""
+	source $ADMIN_RC_FILE
+	cd /tmp/
+	wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+	echo "- Create Image Cirros"
+	openstack image create "cirros" \
+		--file cirros-0.3.4-x86_64-disk.img \
+		--disk-format qcow2 --container-format bare \
+		--public
+	echo "- Image list"
+	openstack image list
+}
+
+main()
+{
+	echo "INSTALL_GLANCE = $INSTALL_GLANCE"
+	if [ $INSTALL_GLANCE == "yes" ]
+	then
+		create_database
+		create_glance_identity
+		install_configure_glance
+		verify_glance
+		date > /etc/openstack-control-script-config/glance-installed
+	else
+		exit 0
+	fi
+}
+
+main
