@@ -158,7 +158,6 @@ verify_glance()
 	echo "### 5. Verify Glance installation"
 	echo ""
 	source $ADMIN_RC_FILE
-	cd /tmp/
 	wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
 	echo "- Create Image Cirros"
 	openstack image create "cirros" \
@@ -167,6 +166,9 @@ verify_glance()
 		--public
 	echo "- Image list"
 	openstack image list
+	sync
+	sleep 5
+	sync
 }
 
 main()

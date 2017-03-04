@@ -148,13 +148,18 @@ NEUTRON_SERVICE="neutron"
 
 USE_OPENVSWITCH="yes"
 
-PROVIDER_NETWORKS="yes"
+#
+# Choose type of network.
+#
+PROVIDER_NETWORK="yes"
 SELF_SERVICE_NETWORK="no"
 # Also, you need to set up your network vlan ranges. Sample:
 # network_vlan_ranges="provider:1:20,provider:20:200,physical02:100:300"
-NETWORK_VLAN_RANGES=""
+NETWORK_VLAN_RANGES="provider"
 FLAT_NETWORKS="provider"
-BRIDGE_MAPPINGS="provider:br-ex"
+BRIDGE_MAPPINGS="provider:br-provider"
+PROVIDER_BRIDGE="br-provider"
+PROVIDER_INTERFACE="eno1"
 # If you are going to use gre or vxlan, change the following variables according
 # to your preferences
 TUNNEL_ID_RANGES="1:100"
