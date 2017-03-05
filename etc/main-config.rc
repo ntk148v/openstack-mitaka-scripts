@@ -5,7 +5,7 @@
 # 
 # Sample Config
 # Version 1.0.0
-# 10/03/2017
+# 01/03/2017
 #
 
 DEFAULT_PASS="P@ssw0rd"
@@ -147,7 +147,6 @@ NEUTRON_PASS="$DEFAULT_PASS"
 NEUTRON_SERVICE="neutron"
 
 USE_OPENVSWITCH="yes"
-
 #
 # Choose type of network.
 #
@@ -166,4 +165,11 @@ TUNNEL_ID_RANGES="1:100"
 VNI_RANGES="110:1000"
 # Self-service network only
 OVERLAY_INTERFACE_IP_ADDRESS=""
-
+#
+# OPENSTACK HORIZON
+# 
+INSTALL_HORIZON="yes"
+TIMEZONE="Asia\/Ho_Chi_Minh"
+#
+# END OF THE CONFIGURATION FILE
+#

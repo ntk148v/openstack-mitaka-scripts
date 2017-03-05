@@ -5,7 +5,7 @@
 # 
 # Install neutron script
 # Version 1.0.0
-# 10/03/2017
+# 01/03/2017
 #
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
@@ -317,17 +317,12 @@ verify_neutron()
 
 main()
 {
-	echo "INSTALL_NEUTRON = $INSTALL_NEUTRON"
-	if [ $INSTALL_NEUTRON == "yes" ]
-	then
-		create_database
-		create_neutron_identity
-		install_configure_neutron
-		verify_neutron
-		date > /etc/openstack-control-script-config/neutron-installed
-	else
-		exit 0
-	fi
+	echo "### INSTALL_NEUTRON = $INSTALL_NEUTRON"
+	create_database
+	create_neutron_identity
+	install_configure_neutron
+	verify_neutron
+	date > /etc/openstack-control-script-config/neutron-installed
 }
 
 main

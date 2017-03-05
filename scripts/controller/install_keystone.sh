@@ -5,7 +5,7 @@
 # 
 # Install Keystone script
 # Version 1.0.0
-# 10/03/2017
+# 01/03/2017
 #
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
@@ -188,19 +188,15 @@ verify_keystone()
 
 main()
 {
-	echo "INSTALL_KEYSTONE = $INSTALL_KEYSTONE"
-	if [ $INSTALL_KEYSTONE == "yes" ]
-	then
-		create_database
-		install_keystone
-		configure_keystone
-		configure_http
-		create_service_entity_api_enpoints_user_role_domain
-		date > /etc/openstack-control-script-config/keystone-installed
-		verify_keystone
-	else
-		exit 0
-	fi
+	echo "#### INSTALL_KEYSTONE = $INSTALL_KEYSTONE"
+
+	create_database
+	install_keystone
+	configure_keystone
+	configure_http
+	create_service_entity_api_enpoints_user_role_domain
+	verify_keystone
+	date > /etc/openstack-control-script-config/keystone-installed
 }
 
 main

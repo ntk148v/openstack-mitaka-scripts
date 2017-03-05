@@ -5,7 +5,7 @@
 # 
 # Install Glance script
 # Version 1.0.0
-# 10/03/2017
+# 01/03/2017
 #
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
@@ -173,17 +173,12 @@ verify_glance()
 
 main()
 {
-	echo "INSTALL_GLANCE = $INSTALL_GLANCE"
-	if [ $INSTALL_GLANCE == "yes" ]
-	then
-		create_database
-		create_glance_identity
-		install_configure_glance
-		verify_glance
-		date > /etc/openstack-control-script-config/glance-installed
-	else
-		exit 0
-	fi
+	echo "### INSTALL_GLANCE = $INSTALL_GLANCE"
+	create_database
+	create_glance_identity
+	install_configure_glance
+	verify_glance
+	date > /etc/openstack-control-script-config/glance-installed
 }
 
 main

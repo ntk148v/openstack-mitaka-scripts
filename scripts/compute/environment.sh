@@ -5,7 +5,7 @@
 # 
 # Environments config
 # Version 1.0.0
-# 10/03/2017
+# 01/03/2017
 #
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin

@@ -5,7 +5,7 @@
 # 
 # Environments config
 # Version 1.0.0
-# 10/03/2017
+# 01/03/2017
 #
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
@@ -120,12 +120,14 @@ install_memcaced()
 }
 
 main(){
+	echo "### Install Environments"
 	configure_name_resolution
 	install_configure_ntp
 	install_openstack_packages
 	install_configure_sql_database
 	install_rabbitmq
 	install_memcaced
+	date > /etc/openstack-control-script-config/enviroment-installed
 }
 
 main

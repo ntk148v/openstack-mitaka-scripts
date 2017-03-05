@@ -5,7 +5,7 @@
 # 
 # Install nova script
 # Version 1.0.0
-# 10/03/2017
+# 01/03/2017
 #
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
@@ -220,17 +220,12 @@ verify_nova()
 
 main()
 {
-	echo "INSTALL_NOVA = $INSTALL_NOVA"
-	if [ $INSTALL_NOVA == "yes" ]
-	then
-		create_database
-		create_nova_identity
-		install_configure_nova
-		verify_nova
-		date > /etc/openstack-control-script-config/nova-installed
-	else
-		exit 0
-	fi
+	echo "### INSTALL_NOVA = $INSTALL_NOVA"
+	create_database
+	create_nova_identity
+	install_configure_nova
+	verify_nova
+	date > /etc/openstack-control-script-config/nova-installed
 }
 
 main
