@@ -1,1 +1,1 @@
-#Installation OpenStack Newton - CentOS 7
+#Installation OpenStack Mitaka - CentOS 7
