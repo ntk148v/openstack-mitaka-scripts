@@ -20,8 +20,29 @@ export LC_ALL
 # Make sure umask is sane
 umask 022
 
+# Keep track of the openstack-newton-scripts directory
+TOP_DIR=$(cd $(dirname "$0") && pwd)
+
 # Not all distros have sbin in PATH for regular users.
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+
+enable_private_repos()
+{
+    if [ $USE_PRIVATE_REPOS == "yes" ]
+    then
+        # Backup repository configs.
+        cd /etc/yum.repos.d
+        for i in $(ls *.repo); do mv $i $i.orig; done
+        cd $TOP_DIR
+        echo ""
+        echo "### Use Your Private Repos"
+        echo ""
+        cp /etc/openstack-control-script-config/private.repo /etc/yum.repos.d/
+        yum clean all -y
+        yum update
+        yum info subversion
+    fi
+}
 
 main()
 {
@@ -52,6 +73,12 @@ main()
     sleep 5
     sync
 
+    enable_private_repos
+
+    sync
+    sleep 5
+    sync
+
     #
     # Check supper user
     #
@@ -67,7 +94,7 @@ main()
     # Check main-config.rc file
     # 
     
-    if [ -f etc/main-config.rc ]
+    if [ -f $TOP_DIR/etc/main-config.rc ]
     then
         mkdir -p /etc/openstack-control-script-config/
         cp etc/* /etc/openstack-control-script-config/
@@ -85,146 +112,173 @@ main()
         exit 1
     fi
 
-    if [[ -z $CONTROLLER_NODES ]]
-    then
-        echo ""
-        echo "### Please config your controller nodes's ip address"
-        echo ""
-        exit 1
-    else
-        echo ""
-        echo "### INSTALL CONTROLLER NODES"
-        echo ""
-        sync
-        sleep 5
-        sync
+    NODE_TYPE=$1
 
-        #
-        # Install requirement enviroments
-        # - NTP serivce
-        # - SQL database
-        # - Memcached
-        # 
-        ./scripts/controller/enviroment.sh
-        if [ -f /etc/openstack-control-script-config/enviroment-installed ]
+    case $NODE_TYPE in
+    controller*|Controller*|CONTROLLER*)
+        if [[ -z $CONTROLLER_NODES_IP ]]
         then
             echo ""
-            echo "### OPENSTACK ENVIROMENT INSTALLED"
+            echo "### Please config your controller nodes's ip address"
             echo ""
+            exit 1
         else
             echo ""
-            echo "### OPENSTACK ENVIROMENT INSTALLATION FAILED. ABORTING !!"
+            echo "### INSTALL CONTROLLER NODES"
             echo ""
-            exit 0
-        fi
-        # 
-        # Install Keystone service
-        # 
-        
-        if [ $INSTALL_KEYSTONE == "yes" ]
-        then
-            ./scripts/controller/install_keystone.sh
-            if [ -f /etc/openstack-control-script-config/keystone-installed ]
+            sync
+            sleep 5
+            sync
+
+            #
+            # Install requirement enviroments
+            # - NTP serivce
+            # - SQL database
+            # - Memcached
+            # 
+            $TOP_DIR/scripts/controller/enviroment.sh
+            if [ -f /etc/openstack-control-script-config/enviroment-installed ]
             then
                 echo ""
-                echo "### OPENSTACK KEYSTONE INSTALLED"
+                echo "### OPENSTACK ENVIROMENT INSTALLED"
                 echo ""
             else
                 echo ""
-                echo "### OPENSTACK KEYSTONE INSTALLATION FAILED. ABORTING !!"
+                echo "### OPENSTACK ENVIROMENT INSTALLATION FAILED. ABORTING !!"
                 echo ""
                 exit 0
+            fi
+            # 
+            # Install Keystone service
+            # 
+            
+            if [ $INSTALL_KEYSTONE == "yes" ]
+            then
+                $TOP_DIR/scripts/controller/install_keystone.sh
+                if [ -f /etc/openstack-control-script-config/keystone-installed ]
+                then
+                    echo ""
+                    echo "### OPENSTACK KEYSTONE INSTALLED"
+                    echo ""
+                else
+                    echo ""
+                    echo "### OPENSTACK KEYSTONE INSTALLATION FAILED. ABORTING !!"
+                    echo ""
+                    exit 0
+                fi
+            fi
+            
+            #
+            # Install Glance service
+            #
+            
+            if [ $INSTALL_GLANCE == "yes" ]
+            then
+                $TOP_DIR/scripts/controller/install_glance.sh
+                if [ -f /etc/openstack-control-script-config/glance-installed ]
+                then
+                    echo ""
+                    echo "### OPENSTACK GLANCE INSTALLED"
+                    echo ""
+                else
+                    echo ""
+                    echo "### OPENSTACK GLANCE INSTALLATION FAILED. ABORTING !!"
+                    echo ""
+                    exit 0
+                fi
+            fi
+            
+            #
+            # Install Nova service
+            # 
+            
+
+            if [ $INSTALL_NOVA == "yes" ]
+            then
+                $TOP_DIR/scripts/controller/install_nova.sh
+                if [ -f /etc/openstack-control-script-config/nova-installed ]
+                then
+                    echo ""
+                    echo "### OPENSTACK NOVA INSTALLED"
+                    echo ""
+                else
+                    echo ""
+                    echo "### OPENSTACK NOVA INSTALLATION FAILED. ABORTING !!"
+                    echo ""
+                    exit 0
+                fi
+            fi
+
+            #
+            # Install Neutron service
+            # 
+            
+            if [ $INSTALL_NEUTRON == "yes" ]
+            then
+                if [ $USE_OPENVSWITCH == "yes "]
+                then
+                    #
+                    # Install Neutron service with OpenVSwitch
+                    #
+                    $TOP_DIR/scripts/controller/install_neutron_openvswitch.sh
+                else
+                    #
+                    # Install Neutron serivce with LinuxBridge
+                    # (TODO)
+                    # 
+                    echo ""
+                    echo "### Until now, this scripts doesn't support Neutron LinuxBridge."
+                    echo "### Please use OpenVSwitch instead."
+                    echo "### Thanks for using scripts. I will update it ASAP"
+                    echo ""
+                    sync
+                    sleep 5
+                    sync
+                    exit 0
+                fi
+
+                if [ -f /etc/openstack-control-script-config/neutron-installed ]
+                then
+                    echo ""
+                    echo "### OPENSTACK NEUTRON INSTALLED"
+                    echo ""
+                else
+                    echo ""
+                    echo "### OPENSTACK NEUTRON INSTALLATION FAILED. ABORTING !!"
+                    echo ""
+                    exit 0
+                fi
+            fi
+
+            #
+            # Install Horizon service
+            #
+            
+            if [ $INSTALL_HORIZON == "yes" ]
+            then
+                $TOP_DIR/scripts/controller/install_horizon.sh
+                if [ -f /etc/openstack-control-script-config/horizon-installed ]
+                then
+                    echo ""
+                    echo "### OPENSTACK HORIZON INSTALLED"
+                    echo ""
+                else
+                    echo ""
+                    echo "### OPENSTACK HORIZON INSTALLATION FAILED. ABORTING !!"
+                    echo ""
+                    exit 0
+                fi
             fi
         fi
+        ;;
+
+    compute*|Compute*|COMPUTE*)
         
-        #
-        # Install Glance service
-        #
-        
-        if [ $INSTALL_GLANCE == "yes" ]
-        then
-            ./scripts/controller/install_glance.sh
-            if [ -f /etc/openstack-control-script-config/glance-installed ]
-            then
-                echo ""
-                echo "### OPENSTACK GLANCE INSTALLED"
-                echo ""
-            else
-                echo ""
-                echo "### OPENSTACK GLANCE INSTALLATION FAILED. ABORTING !!"
-                echo ""
-                exit 0
-            fi
-        fi
-        
-        #
-        # Install Nova service
-        # 
-        
-
-        if [ $INSTALL_NOVA == "yes" ]
-        then
-            ./scripts/controller/install_nova.sh
-            if [ -f /etc/openstack-control-script-config/nova-installed ]
-            then
-                echo ""
-                echo "### OPENSTACK NOVA INSTALLED"
-                echo ""
-            else
-                echo ""
-                echo "### OPENSTACK NOVA INSTALLATION FAILED. ABORTING !!"
-                echo ""
-                exit 0
-            fi
-        fi
-
-        #
-        # Install Neutron service
-        # 
-        
-        if [ $INSTALL_NOVA == "yes" ]
-        then
-            if [ $USE_OPENVSWITCH == "yes "]
-            then
-                #
-                # Install Neutron service with OpenVSwitch
-                #
-                ./scripts/controller/install_neutron_openvswitch.sh
-            else
-                #
-                # Install Neutron serivce with LinuxBridge
-                # (TODO)
-                # 
-                echo ""
-                echo "### Until now, this scripts doesn't support Neutron LinuxBridge."
-                echo "### Please use OpenVSwitch instead."
-                echo "### Thanks for using scripts. I will update it ASAP"
-                echo ""
-                sync
-                sleep 5
-                sync
-                exit 0
-            fi
-
-            if [ -f /etc/openstack-control-script-config/neutron-installed ]
-            then
-                echo ""
-                echo "### OPENSTACK NEUTRON INSTALLED"
-                echo ""
-            else
-                echo ""
-                echo "### OPENSTACK NEUTRON INSTALLATION FAILED. ABORTING !!"
-                echo ""
-                exit 0
-            fi
-        fi 
-
-
-
         #
         # Install Compute Nodes
-        # 
-        if [[ -z $COMPUTE_NODES ]]
+        #
+         
+        if [[ -z $COMPUTE_NODES_IP ]] && [[$COMPUTE_NODES == *$NODE_TYPE* ]]
         then
             echo ""
             echo "### You don't setup any compute nodes."
@@ -232,46 +286,60 @@ main()
             echo ""
         else
             echo ""
-            echo "### INSTALL COMPUTE NODES"
+            echo "### INSTALL COMPUTE NODES - $NODE_TYPE"
             echo ""
             sync
             sleep 5
             sync
+
             #
             # Install requirement environments.
             # - NTP service.
-            # 
-            ./scripts/compute/environment.sh
             #
-            # Install Nova service
-            # 
-            ./scripts/compute/install_nova.sh
-            #
-            # Install Neutron service
-            # 
-            ./scripts/compute/install_neutron_openvswitch.sh
-        fi
-
-        #
-        # Install Horizon service
-        #
-        
-        if [ $INSTALL_HORIZON == "yes" ]
-        then
-            ./scripts/controller/install_horizon.sh
-            if [ -f /etc/openstack-control-script-config/horizon-installed ]
+            
+            $TOP_DIR/scripts/compute/environment.sh
+            if [ -f /etc/openstack-control-script-config/enviroment-compute-installed ]
             then
                 echo ""
-                echo "### OPENSTACK HORIZON INSTALLED"
+                echo "### OPENSTACK ENVIROMENT COMPUTE $NODE_TYPE INSTALLED"
                 echo ""
             else
                 echo ""
-                echo "### OPENSTACK HORIZON INSTALLATION FAILED. ABORTING !!"
+                echo "### OPENSTACK ENVIROMENT COMPUTE $NODE_TYPE INSTALLATION FAILED. ABORTING !!"
                 echo ""
                 exit 0
             fi
+
+            #
+            # Install Nova service
+            # 
+            
+            $TOP_DIR/scripts/compute/install_nova.sh $NODE_TYPE
+            if [ -f /etc/openstack-control-script-config/nova-$NODE_TYPE-installed ]
+            then
+                echo ""
+                echo "### OPENSTACK NOVA COMPUTE $NODE_TYPE INSTALLED"
+                echo ""
+            else
+                echo ""
+                echo "### OPENSTACK NOVA COMPUTE $NODE_TYPE INSTALLATION FAILED. ABORTING !!"
+                echo ""
+                exit 0
+            fi
+            
+            #
+            # Install Neutron service
+            # 
+            
+            $TOP_DIR/scripts/compute/install_neutron_openvswitch.sh $NODE_TYPE
         fi
-    fi
+        ;;
+    *)
+        echo ""
+        echo "### Usage: ./main-installer.sh controller|compute1|compute2... "
+        echo ""
+    esac
+
     sync
     sleep 5
     sync
@@ -287,4 +355,4 @@ main()
     echo "###################################################"
 }
 
-main
+main $1

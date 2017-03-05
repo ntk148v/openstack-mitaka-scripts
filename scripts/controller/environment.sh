@@ -22,11 +22,11 @@ fi
 configure_name_resolution()
 {
 	echo "### 1. Hostname config"
-	echo "$CONTROLLER_NODES 	controller" >> /etc/hosts
+	echo "$CONTROLLER_NODES_IP 	controller" >> /etc/hosts
 	count=1
 	for COMPUTE_NODE in $COMPUTE_NODES
 	do
-		echo "$COMPUTE_NODE 	compute$count" >> /etc/hosts
+		echo "$COMPUTE_NODE_IP 	compute$count" >> /etc/hosts
 		count=$((count+1))
 	done
 	echo "### Configure name resolution is Done!"
@@ -52,7 +52,10 @@ install_configure_ntp()
 install_openstack_packages()
 {
 	echo "### 3. Enable the OpenStack repository"
-	yum -y install centos-release-openstack-mitaka
+	if [ $USE_PRIVATE_REPOS == "no" ]
+	then
+		yum -y install centos-release-openstack-mitaka
+	fi
 	yum -y update
 	yum -y upgrade
 	yum -y install python-openstackclient openstack-selinux crudini
@@ -65,7 +68,7 @@ install_configure_sql_database()
 	if [ $? -eq 0 ]
 	then
 		touch /etc/my.cnf.d/openstack.cnf
-		crudini --set /etc/my.cnf.d/openstack.cnf mysqld bind-address $CONTROLLER_NODES
+		crudini --set /etc/my.cnf.d/openstack.cnf mysqld bind-address $CONTROLLER_NODES_IP
 		crudini --set /etc/my.cnf.d/openstack.cnf mysqld default-storage-engine innodb
 		crudini --set /etc/my.cnf.d/openstack.cnf mysqld innodb_file_per_table
 		crudini --set /etc/my.cnf.d/openstack.cnf mysqld max_connections 4096

@@ -22,11 +22,11 @@ fi
 configure_name_resolution()
 {
 	echo "### 1. Hostname config"
-	echo "$CONTROLLER_NODES 	controller" >> /etc/hosts
+	echo "$CONTROLLER_NODES_IP 	controller" >> /etc/hosts
 	count=1
-	for COMPUTE_NODE in $COMPUTE_NODES
+	for COMPUTE_NODE_IP in $COMPUTE_NODES_IP
 	do
-		echo "$COMPUTE_NODE 	compute$count" >> /etc/hosts
+		echo "$COMPUTE_NODE_IP 	compute$count" >> /etc/hosts
 		count=$((count+1))
 	done
 	echo "### Configure name resolution is Done!"
@@ -64,6 +64,7 @@ main(){
 	configure_name_resolution
 	install_configure_ntp
 	install_openstack_packages
+	date > /etc/openstack-control-script-config/enviroment-compute-installed
 }
 
 main

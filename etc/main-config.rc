@@ -8,6 +8,11 @@
 # 01/03/2017
 #
 
+#
+# Use Private Repository
+# 
+USE_PRIVATE_REPOS="yes"
+
 DEFAULT_PASS="P@ssw0rd"
 # The hostname or IP address of a suitable more accurate (lower stratum) NTP server.
 # The configuration supports multiple server keys.
@@ -73,12 +78,16 @@ SWIFT_DBPASS="$DEFAULT_PASS"
 #
 # OPENSTACK CLUSTER INFORMATION
 # 
-# Controller Nodes:
+# Controller Nodes
 # Specific Ip address - In this version, support 1 controller.
-CONTROLLER_NODES="10.1.0.10"
+# It'll be map to each other like controller - 10.1.0.10
+COMPUTE_NODES="controller"
+CONTROLLER_NODES_IP="10.1.0.10"
 # Compute Nodes:
 # Specific Ip addresses
-COMPUTE_NODES="10.1.0.11 10.1.0.11"
+# It'll be map to each other like compute1 - 10.1.0.11
+COMPUTE_NODES="compute1 compute2"
+COMPUTE_NODES_IP="10.1.0.11 10.1.0.12"
 #
 # OPENSTACK KEYSTONE
 # User declaration in Keystone

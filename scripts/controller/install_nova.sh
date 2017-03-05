@@ -7,6 +7,7 @@
 # Version 1.0.0
 # 01/03/2017
 #
+
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
 if [ -f /etc/openstack-control-script-config/main-config.rc ]
@@ -104,7 +105,7 @@ install_configure_nova()
 	crudini --set /etc/nova/nova.conf DEFAULT rpc_backend rabbit
 	crudini --set /etc/nova/nova.conf DEFAULT use_neutron True
 	crudini --set /etc/nova/nova.conf DEFAULT firewall_driver nova.virt.firewall.NoopFirewallDriver
-	crudini --set /etc/nova/nova.conf DEFAULT my_ip $CONTROLLER_NODES
+	crudini --set /etc/nova/nova.conf DEFAULT my_ip $CONTROLLER_NODES_IP
 
 	#
 	# Libvirt Configuration
