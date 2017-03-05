@@ -1,2 +1,1 @@
-# openstack-newton-scripts
-Installation OpenStack Newton Scripts - CentOS 7
+#Installation OpenStack Newton - CentOS 7
