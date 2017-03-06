@@ -168,8 +168,8 @@ install_configure_neutron()
 	# 
 	
 	crudini --set /etc/neutron/plugins/ml2/linuxbridge_agent.ini linux_bridge physical_interface_mappings BRIDGE_MAPPINGS
-	crudini --set /etc/neutron/plugins/ml2/linuxbridge_agent.ini linux_bridge securitygroup enable_security_group True
-	crudini --set /etc/neutron/plugins/ml2/linuxbridge_agent.ini linux_bridge securitygroup firewall_driver neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+	crudini --set /etc/neutron/plugins/ml2/linuxbridge_agent.ini securitygroup enable_security_group True
+	crudini --set /etc/neutron/plugins/ml2/linuxbridge_agent.ini securitygroup firewall_driver neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 
 	#
 	# dhcp agent configuration
