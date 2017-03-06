@@ -148,6 +148,7 @@ main()
 	echo "### INSTALL_NEUTRON = $INSTALL_NEUTRON"
 	install_configure_neutron
 	verify_neutron
-	date > /etc/openstack-control-script-config/neutron-linuxbridge-compute-installed
+	date > /etc/openstack-control-script-config/neutron-linuxbridge-$1-installed
+}
 
-main
+main $1
