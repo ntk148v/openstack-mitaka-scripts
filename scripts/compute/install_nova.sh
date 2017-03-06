@@ -14,7 +14,7 @@ if [ -f /etc/openstack-control-script-config/main-config.rc ]
 then
     source /etc/openstack-control-script-config/main-config.rc
 else
-    echo "### Can't access my config file. Aborting !"
+    echo "###  ERROR:Can't access my config file. Aborting !"
     echo ""
     exit 0
 fi
@@ -44,15 +44,15 @@ install_configure_nova()
     # Keystone NOVA Configuration
     #
 
-    crudini --set /etc/nova/nova.conf keystone_authtoken auth_uri http://controller:5000
-    crudini --set /etc/nova/nova.conf keystone_authtoken auth_url http://controller:35357
+    crudini --set /etc/nova/nova.conf keystone_authtoken auth_uri http://$CONTROLLER_NODES:5000
+    crudini --set /etc/nova/nova.conf keystone_authtoken auth_url http://$CONTROLLER_NODES:35357
     crudini --set /etc/nova/nova.conf keystone_authtoken auth_type password
     crudini --set /etc/nova/nova.conf keystone_authtoken project_domain_name default
     crudini --set /etc/nova/nova.conf keystone_authtoken user_domain_name default
     crudini --set /etc/nova/nova.conf keystone_authtoken project_name service
     crudini --set /etc/nova/nova.conf keystone_authtoken username $NOVA_USER
     crudini --set /etc/nova/nova.conf keystone_authtoken password $NOVA_PASS
-    crudini --set /etc/nova/nova.conf keystone_authtoken memcached_servers controller:11211
+    crudini --set /etc/nova/nova.conf keystone_authtoken memcached_servers $CONTROLLER_NODES:11211
 
     crudini --set /etc/nova/nova.conf DEFAULT auth_strategy keystone
     crudini --set /etc/nova/nova.conf DEFAULT rpc_backend rabbit
@@ -63,7 +63,7 @@ install_configure_nova()
     #
     # Rabbit Configuration
     # 
-    crudini --set /etc/nova/nova.conf oslo_messaging_rabbit rabbit_host controller
+    crudini --set /etc/nova/nova.conf oslo_messaging_rabbit rabbit_host $CONTROLLER_NODES
     crudini --set /etc/nova/nova.conf oslo_messaging_rabbit rabbit_userid $RABBIT_USER
     crudini --set /etc/nova/nova.conf oslo_messaging_rabbit rabbit_password $RABBIT_PASS
 
@@ -73,9 +73,9 @@ install_configure_nova()
     crudini --set /etc/nova/nova.conf vnc enabled True
     crudini --set /etc/nova/nova.conf vnc vncserver_listen 0.0.0.0
     crudini --set /etc/nova/nova.conf vnc vncserver_proxyclient_address $my_ip
-    crudini --set /etc/nova/nova.conf vnc novncproxy_base_url = http://controller:6080/vnc_auto.html
+    crudini --set /etc/nova/nova.conf vnc novncproxy_base_url = http://$CONTROLLER_NODES:6080/vnc_auto.html
 
-    crudini --set /etc/nova/nova.conf glance api_servers http://controller:9292
+    crudini --set /etc/nova/nova.conf glance api_servers http://$CONTROLLER_NODES:9292
     crudini --set /etc/nova/nova.conf oslo_concurrency lock_path /var/lib/nova/tmp
 
     #

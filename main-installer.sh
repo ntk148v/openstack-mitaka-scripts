@@ -35,7 +35,7 @@ enable_private_repos()
         for i in $(ls *.repo); do mv $i $i.orig; done
         cd $TOP_DIR
         echo ""
-        echo "### Use Your Private Repos"
+        echo "### ERROR: Use Your Private Repos"
         echo ""
         cp /etc/openstack-control-script-config/private.repo /etc/yum.repos.d/
         yum clean all -y
@@ -86,7 +86,7 @@ main()
     if [ $(id -u) -ne 0 ]
     then
         clear
-        echo "### User is not permission. Please use root."
+        echo "### ERROR: User is not permission. Please use root."
         exit 1
     fi
 
@@ -105,7 +105,7 @@ main()
         find . -name "*.sh" -type f -exec chmod 755 "{}" ";"
     else
         echo ""
-        echo "### I can't access my own configuration"
+        echo "### ERROR:I can't access my own configuration"
         echo "### Please check you are executing the installer in its correct directory"
         echo "### Aborting !!!!."
         echo ""
@@ -119,7 +119,7 @@ main()
         if [[ -z $CONTROLLER_NODES_IP ]]
         then
             echo ""
-            echo "### Please config your controller nodes's ip address"
+            echo "### ERROR: Please config your controller nodes's ip address"
             echo ""
             exit 1
         else
@@ -144,7 +144,7 @@ main()
                 echo ""
             else
                 echo ""
-                echo "### OPENSTACK ENVIROMENT INSTALLATION FAILED. ABORTING !!"
+                echo "###  ERROR:OPENSTACK ENVIROMENT INSTALLATION FAILED. ABORTING !!"
                 echo ""
                 exit 0
             fi
@@ -162,7 +162,7 @@ main()
                     echo ""
                 else
                     echo ""
-                    echo "### OPENSTACK KEYSTONE INSTALLATION FAILED. ABORTING !!"
+                    echo "### ERROR: OPENSTACK KEYSTONE INSTALLATION FAILED. ABORTING !!"
                     echo ""
                     exit 0
                 fi
@@ -182,7 +182,7 @@ main()
                     echo ""
                 else
                     echo ""
-                    echo "### OPENSTACK GLANCE INSTALLATION FAILED. ABORTING !!"
+                    echo "### ERROR: OPENSTACK GLANCE INSTALLATION FAILED. ABORTING !!"
                     echo ""
                     exit 0
                 fi
@@ -203,7 +203,7 @@ main()
                     echo ""
                 else
                     echo ""
-                    echo "### OPENSTACK NOVA INSTALLATION FAILED. ABORTING !!"
+                    echo "### ERROR: OPENSTACK NOVA INSTALLATION FAILED. ABORTING !!"
                     echo ""
                     exit 0
                 fi
@@ -215,39 +215,54 @@ main()
             
             if [ $INSTALL_NEUTRON == "yes" ]
             then
-                if [ $USE_OPENVSWITCH == "yes "]
-                then
+                case $ML2_PLUGIN in
+                openvswitch)
                     #
                     # Install Neutron service with OpenVSwitch
                     #
                     $TOP_DIR/scripts/controller/install_neutron_openvswitch.sh
-                else
-                    #
-                    # Install Neutron serivce with LinuxBridge
-                    # (TODO)
-                    # 
-                    echo ""
-                    echo "### Until now, this scripts doesn't support Neutron LinuxBridge."
-                    echo "### Please use OpenVSwitch instead."
-                    echo "### Thanks for using scripts. I will update it ASAP"
-                    echo ""
-                    sync
-                    sleep 5
-                    sync
-                    exit 0
-                fi
 
-                if [ -f /etc/openstack-control-script-config/neutron-installed ]
-                then
+                    if [ -f /etc/openstack-control-script-config/neutron-openvswitch-installed ]
+                    then
+                        echo ""
+                        echo "### OPENSTACK NEUTRON INSTALLED"
+                        echo ""
+                    else
+                        echo ""
+                        echo "### ERROR: OPENSTACK NEUTRON INSTALLATION FAILED. ABORTING !!"
+                        echo ""
+                        exit 0
+                    fi
+                    ;;
+                linuxbridge)
+                    #
+                    # Install Neutron service with LinuxBridge
+                    #
+                    $TOP_DIR/scripts/controller/install_neutron_linuxbridge.sh
+                    if [ -f /etc/openstack-control-script-config/neutron-linuxbridge-installed ]
+                    then
+                        echo ""
+                        echo "### OPENSTACK NEUTRON INSTALLED"
+                        echo ""
+                    else
+                        echo ""
+                        echo "### ERROR: OPENSTACK NEUTRON INSTALLATION FAILED. ABORTING !!"
+                        echo ""
+                        exit 0
+                    fi
+                    ;;
+                *)
                     echo ""
-                    echo "### OPENSTACK NEUTRON INSTALLED"
+                    echo "###  ERROR:Wrong ML2_PLUGIN variable, config this variable with 'openvswitch'"
+                    echo "### or 'linuxbridge'"
                     echo ""
-                else
-                    echo ""
-                    echo "### OPENSTACK NEUTRON INSTALLATION FAILED. ABORTING !!"
-                    echo ""
-                    exit 0
-                fi
+                    exit 1
+                    ;;
+                esac
+
+                sync
+                sleep 5
+                sync
             fi
 
             #
@@ -264,7 +279,7 @@ main()
                     echo ""
                 else
                     echo ""
-                    echo "### OPENSTACK HORIZON INSTALLATION FAILED. ABORTING !!"
+                    echo "### ERROR: OPENSTACK HORIZON INSTALLATION FAILED. ABORTING !!"
                     echo ""
                     exit 0
                 fi
@@ -305,7 +320,7 @@ main()
                 echo ""
             else
                 echo ""
-                echo "### OPENSTACK ENVIROMENT COMPUTE $NODE_TYPE INSTALLATION FAILED. ABORTING !!"
+                echo "### ERROR: OPENSTACK ENVIROMENT COMPUTE $NODE_TYPE INSTALLATION FAILED. ABORTING !!"
                 echo ""
                 exit 0
             fi
@@ -322,7 +337,7 @@ main()
                 echo ""
             else
                 echo ""
-                echo "### OPENSTACK NOVA COMPUTE $NODE_TYPE INSTALLATION FAILED. ABORTING !!"
+                echo "### ERROR: OPENSTACK NOVA COMPUTE $NODE_TYPE INSTALLATION FAILED. ABORTING !!"
                 echo ""
                 exit 0
             fi
@@ -331,7 +346,57 @@ main()
             # Install Neutron service
             # 
             
-            $TOP_DIR/scripts/compute/install_neutron_openvswitch.sh $NODE_TYPE
+            if [ $INSTALL_NEUTRON == "yes" ]
+            then
+                case $ML2_PLUGIN in
+                openvswitch)
+                    #
+                    # Install Neutron service with OpenVSwitch
+                    #
+                    $TOP_DIR/scripts/controller/install_neutron_openvswitch.sh
+
+                    if [ -f /etc/openstack-control-script-config/neutron-openvswitch-$NODE_TYPE-installed ]
+                    then
+                        echo ""
+                        echo "### OPENSTACK NEUTRON $NODE_TYPE INSTALLED"
+                        echo ""
+                    else
+                        echo ""
+                        echo "### ERROR: OPENSTACK NEUTRON $NODE_TYPE INSTALLATION FAILED. ABORTING !!"
+                        echo ""
+                        exit 0
+                    fi
+                    ;;
+                linuxbridge)
+                    #
+                    # Install Neutron service with LinuxBridge
+                    #
+                    $TOP_DIR/scripts/controller/install_neutron_linuxbridge.sh
+                    if [ -f /etc/openstack-control-script-config/neutron-linuxbridge-$NODE_TYPE-installed ]
+                    then
+                        echo ""
+                        echo "### OPENSTACK NEUTRON $NODE_TYPE INSTALLED"
+                        echo ""
+                    else
+                        echo ""
+                        echo "### ERROR: OPENSTACK NEUTRON $NODE_TYPE INSTALLATION FAILED. ABORTING !!"
+                        echo ""
+                        exit 0
+                    fi
+                    ;;
+                *)
+                    echo ""
+                    echo "###  ERROR:Wrong ML2_PLUGIN variable, config this variable with 'openvswitch'"
+                    echo "### or 'linuxbridge'"
+                    echo ""
+                    exit 1
+                    ;;
+                esac
+
+                sync
+                sleep 5
+                sync
+            fi
         fi
         ;;
     *)

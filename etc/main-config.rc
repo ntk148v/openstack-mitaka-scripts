@@ -81,7 +81,7 @@ SWIFT_DBPASS="$DEFAULT_PASS"
 # Controller Nodes
 # Specific Ip address - In this version, support 1 controller.
 # It'll be map to each other like controller - 10.1.0.10
-COMPUTE_NODES="controller"
+CONTROLLER_NODES="controller"
 CONTROLLER_NODES_IP="10.1.0.10"
 # Compute Nodes:
 # Specific Ip addresses
@@ -155,12 +155,19 @@ NEUTRON_USER="neutron"
 NEUTRON_PASS="$DEFAULT_PASS"
 NEUTRON_SERVICE="neutron"
 
-USE_OPENVSWITCH="yes"
 #
-# Choose type of network.
+# Choose ML2 Plugin
+# "openvswitch" or "linuxbridge"
+# 
+
+ML2_PLUGIN="linuxbridge"
+
 #
-PROVIDER_NETWORK="yes"
-SELF_SERVICE_NETWORK="no"
+# Choose network option
+# "self-service" or "provider"
+#
+NETWORK_OPT="self-service"
+
 # Also, you need to set up your network vlan ranges. Sample:
 # network_vlan_ranges="provider:1:20,provider:20:200,physical02:100:300"
 NETWORK_VLAN_RANGES="provider"

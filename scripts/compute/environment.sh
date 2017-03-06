@@ -14,7 +14,7 @@ if [ -f /etc/openstack-control-script-config/main-config.rc ]
 then
 	source /etc/openstack-control-script-config/main-config.rc
 else
-	echo "Can't access my config file. Aborting !"
+	echo " ERROR:Can't access my config file. Aborting !"
 	echo ""
 	exit 0
 fi
@@ -22,12 +22,38 @@ fi
 configure_name_resolution()
 {
 	echo "### 1. Hostname config"
-	echo "$CONTROLLER_NODES_IP 	controller" >> /etc/hosts
-	count=1
-	for COMPUTE_NODE_IP in $COMPUTE_NODES_IP
+	echo "$CONTROLLER_NODES_IP 	$CONTROLLER_NODES" >> /etc/hosts
+	#
+	# String to array
+	# 
+	
+	temp_array_1=($COMPUTE_NODES)
+	temp_array_2=($COMPUTE_NODES_IP)
+
+	len_1=${#temp_array_1[@]}
+	len_2=${#temp_array_2[@]}
+
+	#
+	# Check config
+	# 
+	
+	if [ $len_1 != $len_2 ]
+	then
+		echo ""
+		echo "### ERROR: Wrong config COMPUTE_NODES and COMPUTE_NODES_IP"
+		echo "### Same size"
+		echo ""
+		exit 1
+	fi
+
+	#
+	# Append to /etc/hosts, skip if existed
+	for i in ${!temp_array_1[@]};
 	do
-		echo "$COMPUTE_NODE_IP 	compute$count" >> /etc/hosts
-		count=$((count+1))
+		if ! grep -q "${temp_array_1[$i]} 	${temp_array_2[$i]}"  /etc/hosts;
+		then
+			echo "${temp_array_1[$i]} 	${temp_array_2[$i]}" >> /etc/hosts
+		fi
 	done
 	echo "### Configure name resolution is Done!"
 }
@@ -40,7 +66,7 @@ install_configure_ntp()
 	if [ $? -eq 0 ]
 	then
 		sed -i '/server/d' /etc/chrony.conf
-		echo "server controller iburst" >> /etc/chrony.conf
+		echo "server $CONTROLLER_NODES iburst" >> /etc/chrony.conf
 		systemctl enable chronyd.service
 		systemctl start chronyd.service
 		chronyc sources

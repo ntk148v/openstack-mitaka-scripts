@@ -39,14 +39,14 @@ install_configure_horizon()
     # Change Time zone
     # 
     
-    sed -r -i "s/CUSTOM_TIMEZONE/$TIMEZONE/" /etc/openstack-dashboard/local_settings
+    sed -r -i "s/CUSTOM_TIMEZONE/$TIMEZONE/g" /etc/openstack-dashboard/local_settings.py
+    sed -r -i "s/_CONTROLLER/$CONTROLLER_NODES/g" /etc/openstack-dashboard/local_settings.py  
 
     #
     # If you chose networking option 1, disable support for layer-3 networking services:
     # 
-    
-    if [ $PROVIDER_NETWORK == "yes" ]
-    then
+    case $NETWORK_OPT in
+    provider)
         cat <<eof >> /etc/openstack-dashboard/local_settings.py
 OPENSTACK_NEUTRON_NETWORK = {
     'enable_router': False,
@@ -65,7 +65,8 @@ OPENSTACK_NEUTRON_NETWORK = {
     'supported_vnic_types': ['*'],
 }
 eof
-    else
+        ;;
+    self-service)
         cat <<eof >> /etc/openstack-dashboard/local_settings.py
 OPENSTACK_NEUTRON_NETWORK = {
     'enable_router': True,
@@ -84,7 +85,16 @@ OPENSTACK_NEUTRON_NETWORK = {
     'supported_vnic_types': ['*'],
 }
 eof
-    fi
+        ;;
+    *)
+        echo ""
+        echo "### ERROR: Wrong network option, config this variable with"
+        echo "'self-service' or 'provider'"
+        echo ""
+        exit 1
+        ;; 
+    esac
+    
     sync
     sleep 5
     sync

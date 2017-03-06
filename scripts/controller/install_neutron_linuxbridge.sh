@@ -3,7 +3,7 @@
 # Unattended installer for Openstack
 # Kien Nguyen
 # 
-# Install neutron openvswitch script
+# Install neutron linuxbridge script
 # Version 1.0.0
 # 01/03/2017
 #
@@ -19,7 +19,7 @@ else
 	exit 0
 fi
 
-if [ -f /etc/openstack-control-script-config/neutron-openvswitch-installed ]
+if [ -f /etc/openstack-control-script-config/neutron-linuxbridge-installed ]
 then
 	echo ""
 	echo "### This module was already completed. Exiting !"
@@ -80,23 +80,11 @@ install_configure_neutron()
 	echo "### 3. Install Neutron Packages and Configure Neutron configs"
 	echo ""
 	yum install -y openstack-neutron \
-		openstack-neutron-openvswitch \
+		openstack-neutron-linuxbridge \
 		openstack-neutron-ml2 \
 		python-neutron \
 		python-neutronclient \
 		ebtables
-
-	cat << EOF >> /etc/sysctl.conf
-net.ipv4.ip_nonlocal_bind = 1
-net.ipv4.tcp_keepalive_time = 6
-net.ipv4.tcp_keepalive_intvl = 3
-net.ipv4.tcp_keepalive_probes = 6
-net.ipv4.ip_forward = 1
-net.ipv4.conf.all.rp_filter = 0
-net.ipv4.conf.default.rp_filter = 0
-net.netfilter.nf_conntrack_max = 4000000
-EOF
-sysctl -p
 
 	crudini --set /etc/neutron/neutron.conf DEFAULT core_plugin ml2
 	crudini --set /etc/neutron/neutron.conf DEFAULT auth_strategy keystone
@@ -115,6 +103,7 @@ sysctl -p
 	#
 	# Neutron Keystone Config
 	#
+	
 	crudini --set /etc/neutron/neutron.conf keystone_authtoken auth_uri http://$CONTROLLER_NODES:5000
 	crudini --set /etc/neutron/neutron.conf keystone_authtoken auth_url http://$CONTROLLER_NODES:35357
 	crudini --set /etc/neutron/neutron.conf keystone_authtoken auth_type password
@@ -154,6 +143,7 @@ sysctl -p
 	#
 	# Neutron Nova
 	#
+	
 	crudini --set /etc/nova/nova.conf neutron url http://$CONTROLLER_NODES:9696
 	crudini --set /etc/nova/nova.conf neutron auth_url http://$CONTROLLER_NODES:35357
 	crudini --set /etc/nova/nova.conf neutron auth_type password
@@ -167,43 +157,30 @@ sysctl -p
 	crudini --set /etc/nova/nova.conf neutron metadata_proxy_shared_secret $METADATA_SECRET
 
 	#
-	# metadata agent configuration
-	#
-	
-	crudini --set /etc/neutron/metadata_agent.ini DEFAULT nova_metadata_ip $CONTROLLER_NODES
-	crudini --set /etc/neutron/metadata_agent.ini DEFAULT metadata_proxy_shared_secret $METADATA_SECRET
-
-	#
-	# openvswitch agent configuration
-	#
-
-	crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs bridge_mappings $BRIDGE_MAPPINGS
-	# crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup firewall_driver iptables_hybrid
-	crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup firewall_driver neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
-
-
-	#
 	# ml2 configuration
-	#
+	
 	crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 extension_drivers port_security
 	crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_flat flat_networks $FLAT_NETWORKS
-	crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_vlan network_vlan_ranges $NETWORK_VLAN_RANGES
 	crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini securitygroup enable_ipset True
+
+	#
+	# linuxbridge configuration
+	# 
+	
+	crudini --set /etc/neutron/plugins/ml2/linuxbridge_agent.ini linux_bridge physical_interface_mappings BRIDGE_MAPPINGS
+	crudini --set /etc/neutron/plugins/ml2/linuxbridge_agent.ini linux_bridge securitygroup enable_security_group True
+	crudini --set /etc/neutron/plugins/ml2/linuxbridge_agent.ini linux_bridge securitygroup firewall_driver neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 
 	#
 	# dhcp agent configuration
 	#
 
-	# crudini --set /etc/neutron/dhcp_agent.ini DEFAULT interface_driver openvswitch
-	crudini --set /etc/neutron/dhcp_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
+	crudini --set /etc/neutron/dhcp_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.BridgeInterfaceDriver
 	crudini --set /etc/neutron/dhcp_agent.ini DEFAULT dhcp_driver neutron.agent.linux.dhcp.Dnsmasq
 	crudini --set /etc/neutron/dhcp_agent.ini DEFAULT enable_isolated_metadata True
-	crudini --set /etc/neutron/dhcp_agent.ini DEFAULT force_metadata True
 
 	case $NETWORK_OPT in
 	provider)
-		crudini --set /etc/neutron/neutron.conf DEFAULT service_plugins ""
-		crudini --set /etc/neutron/neutron.conf DEFAULT dhcp_agents_per_network 2
 
 		#
 		# ml2 configuration
@@ -211,26 +188,20 @@ sysctl -p
 
 		crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers "flat,vlan"
 		crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types ""
-		crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers openvswitch
+		crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers linuxbridge
+
+		#
+		# linuxbridge configuration
+		# 
+		
+		crudini --set /etc/neutron/plugins/ml2/linuxbridge_agent.ini vxlan enable_vxlan False
+
 		;;
 	self-service)
+
 		crudini --set /etc/neutron/neutron.conf DEFAULT service_plugins router
-		crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers "local,flat,vlan,gre,vxlan"
-
-		#
-		# openvswitch agent configuration
-		#
-
-		# crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs local_ip OVERLAY_INTERFACE_IP_ADDRESS
-		crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini agent tunnel_types vxlan
-		crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini agent l2_population True
-
-		#
-		# l3 agent configuration
-		#
-		# crudini --set /etc/neutron/l3_agent.ini DEFAULT interface_driver openvswitch
-		crudini --set /etc/neutron/l3_agent.ini DEFAULT  interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
-		crudini --set /etc/neutron/l3_agent.ini DEFAULT  external_network_bridge ""
+		crudini --set /etc/neutron/neutron.conf DEFAULT allow_overlapping_ips True
+		crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers "flat,vlan,vxlan"
 
 		#
 		# ml2 configuration
@@ -238,8 +209,24 @@ sysctl -p
 		
 		crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types vxlan
 		crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 path_mtu 1500
-		crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers "openvswitch,l2population"
+		crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers "linuxbridge,l2population"
 		crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2_type_vxlan vni_ranges $VNI_RANGES
+
+		#
+		# linuxbridge configuration
+		# 
+		
+		crudini --set /etc/neutron/plugins/ml2/linuxbridge_agent.ini vxlan enable_vxlan True
+		crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini vxlan l2_population True
+		crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini vxlan local_ip $OVERLAY_INTERFACE_IP_ADDRESS
+
+		#
+		# l3 agent configuration
+		#
+		
+		crudini --set /etc/neutron/l3_agent.ini DEFAULT  interface_driver neutron.agent.linux.interface.BridgeInterfaceDriver
+		crudini --set /etc/neutron/l3_agent.ini DEFAULT  external_network_bridge ""
+
 		;;
 	*)
 		echo ""
@@ -267,44 +254,19 @@ sysctl -p
 		echo ""
 	fi
 
-	systemctl restart openvswitch
-
-	ovs-vsctl add-br $PROVIDER_BRIDGE
-	ovs-vsctl add-port $PROVIDER_BRIDGE $PROVIDER_INTERFACE
-
-	systemctl enable neutron-server.service
-	systemctl enable neutron-dhcp-agent.service
-	systemctl enable neutron-metadata-agent.service
-	systemctl enable neutron-openvswitch-agent.service
-	systemctl enable openvswitch
 	systemctl restart openstack-nova-api.service
-	systemctl restart neutron-server.service
-	systemctl restart neutron-dhcp-agent.service
-	systemctl restart neutron-metadata-agent.service
-	systemctl restart neutron-openvswitch-agent.service
-	if [ $NETWORK_OPT == "self-service" ]
+
+	systemctl enable neutron-server.service \
+		neutron-linuxbridge-agent.service neutron-dhcp-agent.service \
+  		neutron-metadata-agent.service
+	systemctl start neutron-server.service \
+  		neutron-linuxbridge-agent.service neutron-dhcp-agent.service \
+  		neutron-metadata-agent.service
+  	if [ $NETWORK_OPT == "self-service" ]
 	then
 		systemctl enable neutron-l3-agent.service
 		systemctl restart neutron-l3-agent.service
 	fi
-
-	cat << EOF >> /etc/sysconfig/network-scripts/ifcfg-$PROVIDER_INTERFACE
-OVS_BRIDGE=$PROVIDER_BRIDGE
-TYPE="OVSPort"
-DEVICETYPE="ovs"
-EOF
-
-	cat << EOF > /etc/sysconfig/network-scripts/ifcfg-$PROVIDER_BRIDGE 
-DEVICE="$PROVIDER_BRIDGE"
-BOOTPROTO="none"
-ONBOOT="yes"
-TYPE="OVSBridge"
-DEVICETYPE="ovs"
-EOF
-
-  	sync
-  	sleep 5
-  	sync
 }
 
 verify_neutron()
@@ -329,7 +291,7 @@ main()
 	create_neutron_identity
 	install_configure_neutron
 	verify_neutron
-	date > /etc/openstack-control-script-config/neutron-openvswitch-installed
+	date > /etc/openstack-control-script-config/neutron-linuxbridge-installed
 }
 
 main

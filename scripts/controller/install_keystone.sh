@@ -14,7 +14,7 @@ if [ -f /etc/openstack-control-script-config/main-config.rc ]
 then
 	source /etc/openstack-control-script-config/main-config.rc
 else
-	echo "### Can't access my config file. Aborting !"
+	echo "### ERROR: Can't access my config file. Aborting !"
 	echo ""
 	exit 0
 fi
@@ -29,7 +29,7 @@ fi
 
 create_database()
 {
-	MYSQL_COMMAND="mysql --port=$MYSQLDB_PORT --password=$MYSQLDB_PASSWORD --user=$MYSQLDB_ADMIN --host=controller"
+	MYSQL_COMMAND="mysql --port=$MYSQLDB_PORT --password=$MYSQLDB_PASSWORD --user=$MYSQLDB_ADMIN --host=$CONTROLLER_NODES"
 	echo "### 1. Creating Keystone database"
 	echo "CREATE DATABASE $KEYSTONE_DBNAME;"|$MYSQL_COMMAND
 	echo "GRANT ALL PRIVILEGES ON $KEYSTONE_DBNAME.* TO '$KEYSTONE_DBUSER'@'localhost' IDENTIFIED BY '$KEYSTONE_DBPASS';"|$MYSQL_COMMAND
@@ -60,7 +60,7 @@ configure_keystone()
 {
 	echo "### 3. Configure Keystone"
 	crudini --set /etc/keystone/keystone.conf DEFAULT admin_token $TOKEN_PASS
-	crudini --set /etc/keystone/keystone.conf DEFAULT connection mysql+pymysql://$KEYSTONE_DBUSER:$KEYSTONE_DBPASS@controller/$KEYSTONE_DBNAME
+	crudini --set /etc/keystone/keystone.conf DEFAULT connection mysql+pymysql://$KEYSTONE_DBUSER:$KEYSTONE_DBPASS@$CONTROLLER_NODES/$KEYSTONE_DBNAME
 	crudini --set /etc/keystone/keystone.conf token provider fernet
 	su -s /bin/sh -c "keystone-manage db_sync" $KEYSTONE_DBNAME
 	keystone-manage fernet_setup --keystone-user $KEYSTONE_USER --keystone-group keystone
@@ -70,7 +70,7 @@ configure_keystone()
 configure_http()
 {
 	echo "### 4. Configure HTTPD Server"
-	sed -i -e 's/.*ServerName.*/ServerName controller/g' /etc/httpd/conf/httpd.conf
+	sed -i -e 's/.*ServerName.*/ServerName $CONTROLLER_NODES/g' /etc/httpd/conf/httpd.conf
 	rm /etc/httpd/conf.d/wsgi-keystone.conf
 	cp /etc/openstack-control-script-config/wsgi-keystone.conf /etc/httpd/conf.d/
 	systemctl enable httpd.service
@@ -82,7 +82,7 @@ create_service_entity_api_enpoints_user_role_domain()
 {
 	echo "### 5. Create the service entity and API endpoints"
 	export OS_TOKEN=$ADMIN_TOKEN
-	export OS_URL="http://controller:35357/v3"
+	export OS_URL="http://$CONTROLLER_NODES:35357/v3"
 	export OS_IDENTITY_VERSION=3
 	while true
 	do
@@ -98,11 +98,11 @@ create_service_entity_api_enpoints_user_role_domain()
 	# Create endpoint
 	echo "- Create Endpoints"
 	openstack endpoint create --region RegionOne \
-		identity public "http://controller:5000/v3"
+		identity public "http://$CONTROLLER_NODES:5000/v3"
 	openstack endpoint create --region RegionOne \
-		identity internal "http://controller:5000/v3"
+		identity internal "http://$CONTROLLER_NODES:5000/v3"
 	openstack endpoint create --region RegionOne \
-		identity admin "http://controller:35357/v3"
+		identity admin "http://$CONTROLLER_NODES:35357/v3"
 	# Create domain
 	echo "- Create Domain"
 	openstack domain create --description "Default Domain" default
@@ -130,7 +130,7 @@ export OS_USER_DOMAIN_NAME=default
 export OS_PROJECT_NAME=admin
 export OS_USERNAME=admin
 export OS_PASSWORD=$ADMIN_PASS
-export OS_AUTH_URL=http://$controller:35357/v3
+export OS_AUTH_URL=http://$CONTROLLER_NODES:35357/v3
 export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2
 eof
@@ -141,7 +141,7 @@ export OS_USER_DOMAIN_NAME=default
 export OS_PROJECT_NAME=demo
 export OS_USERNAME=demo
 export OS_PASSWORD=$DEMO_PASS
-export OS_AUTH_URL=http://$controller:5000/v3
+export OS_AUTH_URL=http://$CONTROLLER_NODES:5000/v3
 export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2
 eof

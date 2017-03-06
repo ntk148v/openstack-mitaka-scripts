@@ -14,7 +14,7 @@ if [ -f /etc/openstack-control-script-config/main-config.rc ]
 then
 	source /etc/openstack-control-script-config/main-config.rc
 else
-	echo "### Can't access my config file. Aborting !"
+	echo "### ERROR: Can't access my config file. Aborting !"
 	echo ""
 	exit 0
 fi
@@ -29,7 +29,7 @@ fi
 
 create_database()
 {
-	MYSQL_COMMAND="mysql --port=$MYSQLDB_PORT --password=$MYSQLDB_PASSWORD --user=$MYSQLDB_ADMIN --host=controller"
+	MYSQL_COMMAND="mysql --port=$MYSQLDB_PORT --password=$MYSQLDB_PASSWORD --user=$MYSQLDB_ADMIN --host=$CONTROLLER_NODES"
 	echo "### 1. Creating Glance database"
 	echo "CREATE DATABASE $GLANCE_DBNAME;"|$MYSQL_COMMAND
 	echo "GRANT ALL PRIVILEGES ON $GLANCE_DBNAME.* TO '$GLANCE_DBUSER'@'localhost' IDENTIFIED BY '$GLANCE_DBPASS';"|$MYSQL_COMMAND
@@ -59,11 +59,11 @@ create_glance_identity()
 			--description "OpenStack Image" image
 		echo "- Glance Endpoints"
 		openstack endpoint create --region RegionOne \
-	  		image public http://controller:9292
+	  		image public http://$CONTROLLER_NODES:9292
 	  	openstack endpoint create --region RegionOne \
-	  		image internal http://controller:9292
+	  		image internal http://$CONTROLLER_NODES:9292
 	  	openstack endpoint create --region RegionOne \
-	 		image admin http://controller:9292
+	 		image admin http://$CONTROLLER_NODES:9292
 	 	date > /etc/openstack-control-script-config/keystone-extra-idents-glance
 	 	echo ""
 		echo "### Glance Identity is Done"
@@ -93,23 +93,23 @@ install_configure_glance()
 	crudini --set /etc/glance/glance-api.conf DEFAULT log_file /var/log/glance/api.log
 	crudini --set /etc/glance/glance-api.conf DEFAULT backlog 4096
 	crudini --set /etc/glance/glance-api.conf DEFAULT use_syslog False
- 	crudini --set /etc/glance/glance-api.conf database connection mysql+pymysql://$GLANCE_DBUSER:$GLANCE_DBPASS@controller/$GLANCE_DBNAME
- 	crudini --set /etc/glance/glance-registry.conf database connection mysql+pymysql://$GLANCE_DBUSER:$GLANCE_DBPASS@controller/$GLANCE_DBNAME
+ 	crudini --set /etc/glance/glance-api.conf database connection mysql+pymysql://$GLANCE_DBUSER:$GLANCE_DBPASS@$CONTROLLER_NODES/$GLANCE_DBNAME
+ 	crudini --set /etc/glance/glance-registry.conf database connection mysql+pymysql://$GLANCE_DBUSER:$GLANCE_DBPASS@$CONTROLLER_NODES/$GLANCE_DBNAME
 
- 	crudini --set /etc/glance/glance-api.conf keystone_authtoken auth_uri http://controller:5000
-	crudini --set /etc/glance/glance-api.conf keystone_authtoken auth_url http://controller:35357
+ 	crudini --set /etc/glance/glance-api.conf keystone_authtoken auth_uri http://$CONTROLLER_NODES:5000
+	crudini --set /etc/glance/glance-api.conf keystone_authtoken auth_url http://$CONTROLLER_NODES:35357
 	crudini --set /etc/glance/glance-api.conf keystone_authtoken auth_type password
-	crudini --set /etc/glance/glance-api.conf keystone_authtoken memcached_servers controller:11211
+	crudini --set /etc/glance/glance-api.conf keystone_authtoken memcached_servers $CONTROLLER_NODES:11211
 	crudini --set /etc/glance/glance-api.conf keystone_authtoken project_domain_name default
 	crudini --set /etc/glance/glance-api.conf keystone_authtoken user_domain_name default
 	crudini --set /etc/glance/glance-api.conf keystone_authtoken project_name service
 	crudini --set /etc/glance/glance-api.conf keystone_authtoken username $GLANCE_USER
 	crudini --set /etc/glance/glance-api.conf keystone_authtoken password $GLANCE_PASS
 
-	crudini --set /etc/glance/glance-registry.conf keystone_authtoken auth_uri http://controller:5000
-	crudini --set /etc/glance/glance-registry.conf keystone_authtoken auth_url http://controller:35357
+	crudini --set /etc/glance/glance-registry.conf keystone_authtoken auth_uri http://$CONTROLLER_NODES:5000
+	crudini --set /etc/glance/glance-registry.conf keystone_authtoken auth_url http://$CONTROLLER_NODES:35357
 	crudini --set /etc/glance/glance-registry.conf keystone_authtoken auth_type password
-	crudini --set /etc/glance/glance-registry.conf keystone_authtoken memcached_servers controller:11211
+	crudini --set /etc/glance/glance-registry.conf keystone_authtoken memcached_servers $CONTROLLER_NODES:11211
 	crudini --set /etc/glance/glance-registry.conf keystone_authtoken project_domain_name default
 	crudini --set /etc/glance/glance-registry.conf keystone_authtoken user_domain_name default
 	crudini --set /etc/glance/glance-registry.conf keystone_authtoken project_name service

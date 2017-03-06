@@ -18,13 +18,13 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': 'controller:11211',
+        'LOCATION': '_CONTROLLER:11211',
     }
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-OPENSTACK_HOST = "controller"
+OPENSTACK_HOST = "_CONTROLLER"
 OPENSTACK_KEYSTONE_URL = "http://%s:5000/v3" % OPENSTACK_HOST
 OPENSTACK_KEYSTONE_DEFAULT_DOMAIN = "default"
 OPENSTACK_KEYSTONE_DEFAULT_ROLE = "user"
