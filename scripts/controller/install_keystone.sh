@@ -47,7 +47,7 @@ install_keystone()
 	# We proceed to install keystone packages and it's dependencies
 	#
 	yum -y install openstack-keystone httpd mod_wsgi openstack-utils
-	if [ $? -eq 0 ]
+	if [[ $? -eq 0 ]]
 	then
 		echo "### Install Keystone is Done"
 	else

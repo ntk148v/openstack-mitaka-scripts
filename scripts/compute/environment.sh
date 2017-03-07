@@ -46,7 +46,7 @@ configure_name_resolution()
 	# Check config
 	# 
 	
-	if [ $len_1 != $len_2 ]
+	if [[ $len_1 != $len_2 ]]
 	then
 		echo ""
 		echo "### ERROR: Wrong config COMPUTE_NODES and COMPUTE_NODES_IP"
@@ -72,7 +72,7 @@ install_configure_ntp()
 {
 	echo "### 2. Install ntp-chrony"
 	yum install chrony wget -y
-	if [ $? -eq 0 ]
+	if [[ $? -eq 0 ]]
 	then
 		sed -i '/server/d' /etc/chrony.conf
 		echo "server $CONTROLLER_NODES iburst" >> /etc/chrony.conf
@@ -129,12 +129,12 @@ eof
 	chmod +x $DEMO_RC_FILE
 
 	unset OS_TOKEN OS_URL OS_IDENTITY_API_VERSION
-	if [ -f /etc/openstack-control-script-config/$ADMIN_RC_FILE ]
+	if [[ -f /etc/openstack-control-script-config/$ADMIN_RC_FILE ]]
 	then
 		rm /etc/openstack-control-script-config/$ADMIN_RC_FILE
 	fi
 
-	if [ -f /etc/openstack-control-script-config/$DEMO_RC_FILE ]
+	if [[ -f /etc/openstack-control-script-config/$DEMO_RC_FILE ]]
 	then
 		rm /etc/openstack-control-script-config/$DEMO_RC_FILE
 	fi

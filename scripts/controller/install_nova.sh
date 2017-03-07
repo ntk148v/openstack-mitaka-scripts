@@ -163,7 +163,7 @@ install_configure_nova()
 	echo "### 4. Populate the Compute databases"
 	echo ""
 	su -s /bin/sh -c "nova-manage api_db sync" 
-	if [ $check -gt 2 ]
+	if [[ $check -gt 2 ]]
 	then
 		echo ""
 		echo "### Import Database Nova: OK"
@@ -176,7 +176,7 @@ install_configure_nova()
 	clear
 
 	su -s /bin/sh -c "nova-manage db sync" nova
-	if [ $check -gt 2 ]
+	if [[ $check -gt 2 ]]
 	then
 		echo ""
 		echo "### Import Database Nova: OK"

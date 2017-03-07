@@ -47,7 +47,7 @@ configure_name_resolution()
 	# Check config
 	# 
 	
-	if [ $len_1 != $len_2 ]
+	if [[ $len_1 != $len_2 ]]
 	then
 		echo ""
 		echo "### ERROR: Wrong config COMPUTE_NODES and COMPUTE_NODES_IP"
@@ -72,7 +72,7 @@ install_configure_ntp()
 {
 	echo "### 2. Install ntp-chrony"
 	yum install chrony wget -y
-	if [ $? -eq 0 ]
+	if [[ $? -eq 0 ]]
 	then
 		sed -i '/server/d' /etc/chrony.conf
 		echo "server $NTP_SERVER iburst" >> /etc/chrony.conf
@@ -101,7 +101,7 @@ install_configure_sql_database()
 {
 	echo "### 4. Install and configure MariaDB"
 	yum -y install mariadb mariadb-server python2-PyMySQL
-	if [ $? -eq 0 ]
+	if [[ $? -eq 0 ]]
 	then
 		touch /etc/my.cnf.d/openstack.cnf
 		crudini --set /etc/my.cnf.d/openstack.cnf mysqld bind-address $CONTROLLER_NODES_IP
@@ -131,7 +131,7 @@ install_rabbitmq()
 {
 	echo "### 5. Install and create user with RabbitMQ"
 	yum -y install rabbitmq-server
-	if [ $? -eq 0 ]
+	if [[ $? -eq 0 ]]
 	then
 		systemctl enable rabbitmq-server.service
 		systemctl start rabbitmq-server.service
@@ -148,7 +148,7 @@ install_memcaced()
 {
 	echo "### 6. Install and create user with memcached"
 	yum -y install memcached python-memcached
-	if [ $? -eq 0 ]
+	if [[ $? -eq 0 ]]
 	then
 		systemctl enable memcached.service
 		systemctl start memcached.service

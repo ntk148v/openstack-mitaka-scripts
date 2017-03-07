@@ -83,7 +83,7 @@ main()
     # Check supper user
     #
     
-    if [ $(id -u) -ne 0 ]
+    if [[ $(id -u) -ne 0 ]]
     then
         clear
         echo "### ERROR: User is not permission. Please use root."
