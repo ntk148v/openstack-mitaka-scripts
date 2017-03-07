@@ -403,6 +403,8 @@ main()
         echo ""
         echo "### Usage: ./main-installer.sh controller|compute1|compute2... "
         echo ""
+        exit 0
+        ;;
     esac
 
     sync
