@@ -8,8 +8,6 @@
 # 01/03/2017
 # 
 
-set -o xtrace
-
 # Sanitize language settings to avoid commands bailing out
 # with "unsupported locale setting" errors.
 unset LANG
