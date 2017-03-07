@@ -162,7 +162,7 @@ eof
 	cp $DEMO_RC_FILE /etc/openstack-control-script-config/
 	source /etc/openstack-control-script-config/$ADMIN_RC_FILE
 	openstack token issue
-	source $DEMO_RC_FILE
+	source /etc/openstack-control-script-config/$DEMO_RC_FILE
 	openstack token issue
 }
 
@@ -176,6 +176,7 @@ verify_keystone()
 	echo ""
 	echo "Complete list following bellow:"
 	echo ""
+	source /etc/openstack-control-script-config/$ADMIN_RC_FILE
 	echo "- Projects:"
 	openstack project list
 	sleep 5

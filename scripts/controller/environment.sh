@@ -119,8 +119,8 @@ install_configure_sql_database()
 		echo "password=$MYSQLDB_PASSWORD" >> /root/.my.cnf
 		echo "GRANT ALL PRIVILEGES ON *.* TO '$MYSQLDB_ADMIN'@'%' IDENTIFIED BY '$MYSQLDB_PASSWORD' WITH GRANT OPTION;"|mysql
 		echo "FLUSH PRIVILEGES;"|mysql
-	 	iptables -A INPUT -p tcp -m multiport --dports $MYSQLDB_PORTL -j ACCEPT
-		service iptables save
+	 	# iptables -A INPUT -p tcp -m multiport --dports $MYSQLDB_PORTL -j ACCEPT
+		# service iptables save
 	else
 		clear
 		echo '### Error: install MariaDB'
