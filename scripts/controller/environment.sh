@@ -22,8 +22,10 @@ fi
 configure_name_resolution()
 {
 	echo "### 1. Hostname config"
-	echo "$CONTROLLER_NODES_IP 	$CONTROLLER_NODES" >> /etc/hosts
-	
+	if ! grep -q "$CONTROLLER_NODES_IP 	$CONTROLLER_NODES"  /etc/hosts;
+	then
+		echo "$CONTROLLER_NODES_IP 	$CONTROLLER_NODES" >> /etc/hosts
+	fi
 	#
 	# String to array
 	# 
@@ -51,9 +53,9 @@ configure_name_resolution()
 	# Append to /etc/hosts, skip if existed
 	for i in ${!temp_array_1[@]};
 	do
-		if ! grep -q "${temp_array_1[$i]} 	${temp_array_2[$i]}"  /etc/hosts;
+		if ! grep -q "${temp_array_2[$i]} 	${temp_array_1[$i]}"  /etc/hosts;
 		then
-			echo "${temp_array_1[$i]} 	${temp_array_2[$i]}" >> /etc/hosts
+			echo "${temp_array_2[$i]} 	${temp_array_1[$i]}" >> /etc/hosts
 		fi
 	done
 	echo "### Configure name resolution is Done!"

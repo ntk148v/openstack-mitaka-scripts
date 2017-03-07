@@ -18,7 +18,7 @@ else
 	exit 0
 fi
 
-if [ -f /etc/openstack-control-script-config/neutron-linuxbridge-compute-installed ]
+if [ -f /etc/openstack-control-script-config/neutron-linuxbridge-$1-installed ]
 then
 	echo ""
 	echo "### This module was already completed. Exiting !"

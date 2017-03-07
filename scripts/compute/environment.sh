@@ -22,7 +22,10 @@ fi
 configure_name_resolution()
 {
 	echo "### 1. Hostname config"
-	echo "$CONTROLLER_NODES_IP 	$CONTROLLER_NODES" >> /etc/hosts
+	if ! grep -q "$CONTROLLER_NODES_IP 	$CONTROLLER_NODES"  /etc/hosts;
+	then
+		echo "$CONTROLLER_NODES_IP 	$CONTROLLER_NODES" >> /etc/hosts
+	fi
 	#
 	# String to array
 	# 

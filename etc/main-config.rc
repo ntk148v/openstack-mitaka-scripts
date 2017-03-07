@@ -179,11 +179,13 @@ PROVIDER_INTERFACE="eno1"
 # to your preferences
 TUNNEL_ID_RANGES="1:100"
 VNI_RANGES="110:1000"
-# Self-service network only
+
+# Replace OVERLAY_INTERFACE_IP_ADDRESS with the IP address of the interface
+# that handles VXLAN overlays for self-service networks.
 OVERLAY_INTERFACE_IP_ADDRESS=""
 #
 # OPENSTACK HORIZON
-# 
+#
 INSTALL_HORIZON="yes"
 TIMEZONE="Asia\/Ho_Chi_Minh"
 #

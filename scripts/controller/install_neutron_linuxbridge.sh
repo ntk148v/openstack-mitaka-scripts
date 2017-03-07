@@ -215,7 +215,7 @@ install_configure_neutron()
 		#
 		# linuxbridge configuration
 		# 
-		
+
 		crudini --set /etc/neutron/plugins/ml2/linuxbridge_agent.ini vxlan enable_vxlan True
 		crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini vxlan l2_population True
 		crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini vxlan local_ip $OVERLAY_INTERFACE_IP_ADDRESS
@@ -225,7 +225,7 @@ install_configure_neutron()
 		#
 		
 		crudini --set /etc/neutron/l3_agent.ini DEFAULT  interface_driver neutron.agent.linux.interface.BridgeInterfaceDriver
-		crudini --set /etc/neutron/l3_agent.ini DEFAULT  external_network_bridge ""
+		crudini --set /etc/neutron/l3_agent.ini DEFAULT  external_network_bridge
 
 		;;
 	*)

@@ -221,8 +221,8 @@ sysctl -p
 		# openvswitch agent configuration
 		#
 
-		# crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs local_ip OVERLAY_INTERFACE_IP_ADDRESS
-		crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini agent tunnel_types vxlan
+		crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini ovs local_ip $OVERLAY_INTERFACE_IP_ADDRESS
+		crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini agent tunnel_types vxlan,gre
 		crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini agent l2_population True
 
 		#
@@ -230,7 +230,7 @@ sysctl -p
 		#
 		# crudini --set /etc/neutron/l3_agent.ini DEFAULT interface_driver openvswitch
 		crudini --set /etc/neutron/l3_agent.ini DEFAULT  interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
-		crudini --set /etc/neutron/l3_agent.ini DEFAULT  external_network_bridge ""
+		crudini --set /etc/neutron/l3_agent.ini DEFAULT  external_network_bridge
 
 		#
 		# ml2 configuration
