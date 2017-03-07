@@ -282,6 +282,26 @@ main()
                     exit 0
                 fi
             fi
+
+            #
+            # Install Cinder service
+            #
+            
+            if [[ $INSTALL_CINDER == "yes" ]]
+            then
+                $TOP_DIR/scripts/controller/install_cinder.sh
+                if [[ -f /etc/openstack-control-script-config/cinder-installed ]]
+                then
+                    echo ""
+                    echo "### OPENSTACK CINDER INSTALLED"
+                    echo ""
+                else
+                    echo ""
+                    echo "### ERROR: OPENSTACK CINDER INSTALLATION FAILED. ABORTING !!"
+                    echo ""
+                    exit 0
+                fi
+            fi
         fi
         ;;
 
