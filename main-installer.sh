@@ -136,7 +136,7 @@ main()
             # - SQL database
             # - Memcached
             # 
-            $TOP_DIR/scripts/controller/environmenT.sh
+            $TOP_DIR/scripts/controller/environment.sh
             if [[ -f /etc/openstack-control-script-config/environment-installed ]]
             then
                 echo ""
