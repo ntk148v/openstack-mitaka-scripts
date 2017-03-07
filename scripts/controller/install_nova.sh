@@ -79,7 +79,7 @@ install_configure_nova()
 	echo ""
 	echo "### 3. Install Nova Packages and Configure Nova configs"
 	echo ""
-	yum install openstack-nova-api openstack-nova-conductor \
+	yum -y install openstack-nova-api openstack-nova-conductor \
 		openstack-nova-console openstack-nova-novncproxy \
 		openstack-nova-scheduler openstack-nova-compute
 	#
