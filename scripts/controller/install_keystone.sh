@@ -10,7 +10,7 @@
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
-if [ -f /etc/openstack-control-script-config/main-config.rc ]
+if [[ -f /etc/openstack-control-script-config/main-config.rc ]]
 then
 	source /etc/openstack-control-script-config/main-config.rc
 else
@@ -19,7 +19,7 @@ else
 	exit 0
 fi
 
-if [ -f /etc/openstack-control-script-config/keystone-installed ]
+if [[ -f /etc/openstack-control-script-config/keystone-installed ]]
 then
 	echo ""
 	echo "### This module was already completed. Exiting !"
@@ -148,12 +148,12 @@ eof
 	chmod +x $DEMO_RC_FILE
 
 	unset OS_TOKEN OS_URL OS_IDENTITY_API_VERSION
-	if [ -f /etc/openstack-control-script-config/$ADMIN_RC_FILE ]
+	if [[ -f /etc/openstack-control-script-config/$ADMIN_RC_FILE ]]
 	then
 		rm /etc/openstack-control-script-config/$ADMIN_RC_FILE
 	fi
 
-	if [ -f /etc/openstack-control-script-config/$DEMO_RC_FILE ]
+	if [[ -f /etc/openstack-control-script-config/$DEMO_RC_FILE ]]
 	then
 		rm /etc/openstack-control-script-config/$DEMO_RC_FILE
 	fi

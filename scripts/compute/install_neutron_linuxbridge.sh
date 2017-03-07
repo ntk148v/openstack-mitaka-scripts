@@ -9,7 +9,7 @@
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
-if [ -f /etc/openstack-control-script-config/main-config.rc ]
+if [[ -f /etc/openstack-control-script-config/main-config.rc ]]
 then
 	source /etc/openstack-control-script-config/main-config.rc
 else
@@ -18,7 +18,7 @@ else
 	exit 0
 fi
 
-if [ -f /etc/openstack-control-script-config/neutron-linuxbridge-$1-installed ]
+if [[ -f /etc/openstack-control-script-config/neutron-linuxbridge-$1-installed ]]
 then
 	echo ""
 	echo "### This module was already completed. Exiting !"

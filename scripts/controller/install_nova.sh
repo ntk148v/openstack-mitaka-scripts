@@ -10,7 +10,7 @@
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
-if [ -f /etc/openstack-control-script-config/main-config.rc ]
+if [[ -f /etc/openstack-control-script-config/main-config.rc ]]
 then
 	source /etc/openstack-control-script-config/main-config.rc
 else
@@ -19,7 +19,7 @@ else
 	exit 0
 fi
 
-if [ -f /etc/openstack-control-script-config/nova-installed ]
+if [[ -f /etc/openstack-control-script-config/nova-installed ]]
 then
 	echo ""
 	echo "### This module was already completed. Exiting !"
@@ -47,7 +47,7 @@ create_nova_identity()
 {
 	source /etc/openstack-control-script-config/$ADMIN_RC_FILE
 	echo "### 2. Create Nova user, service and endpoint"
-	if [ -f date > /etc/openstack-control-script-config/keystone-extra-idents-nova ]
+	if [[ -f /etc/openstack-control-script-config/keystone-extra-idents-nova ]]
 	then
 		echo ""
 		echo "### Nova Identity was Done. Pass!"
@@ -111,7 +111,7 @@ install_configure_nova()
 	# Libvirt Configuration
 	# 
 	kvm_possible=`egrep -c '(vmx|svm)' /proc/cpuinfo`
-	if [ $kvm_possible == "0" ]
+	if [[ $kvm_possible == "0" ]]
 	then
 		echo ""
 		echo "### WARNING !. This server does not support KVM"

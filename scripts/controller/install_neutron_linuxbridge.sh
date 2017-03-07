@@ -10,7 +10,7 @@
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
-if [ -f /etc/openstack-control-script-config/main-config.rc ]
+if [[ -f /etc/openstack-control-script-config/main-config.rc ]]
 then
 	source /etc/openstack-control-script-config/main-config.rc
 else
@@ -19,7 +19,7 @@ else
 	exit 0
 fi
 
-if [ -f /etc/openstack-control-script-config/neutron-linuxbridge-installed ]
+if [[ -f /etc/openstack-control-script-config/neutron-linuxbridge-installed ]]
 then
 	echo ""
 	echo "### This module was already completed. Exiting !"
@@ -44,7 +44,7 @@ create_neutron_identity()
 {
 	source /etc/openstack-control-script-config/$ADMIN_RC_FILE
 	echo "### 2. Create neutron user, service and endpoint"
-	if [ -f date > /etc/openstack-control-script-config/keystone-extra-idents-neutron ]
+	if [[ -f  /etc/openstack-control-script-config/keystone-extra-idents-neutron ]]
 	then
 		echo ""
 		echo "### Neutron Identity was Done. Pass!"
@@ -262,7 +262,7 @@ install_configure_neutron()
 	systemctl start neutron-server.service \
   		neutron-linuxbridge-agent.service neutron-dhcp-agent.service \
   		neutron-metadata-agent.service
-  	if [ $NETWORK_OPT == "self-service" ]
+  	if [[ $NETWORK_OPT == "self-service" ]]
 	then
 		systemctl enable neutron-l3-agent.service
 		systemctl restart neutron-l3-agent.service

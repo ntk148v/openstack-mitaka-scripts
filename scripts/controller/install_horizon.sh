@@ -10,7 +10,7 @@
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
-if [ -f /etc/openstack-control-script-config/main-config.rc ]
+if [[ -f /etc/openstack-control-script-config/main-config.rc ]]
 then
     source /etc/openstack-control-script-config/main-config.rc
 else
@@ -19,7 +19,7 @@ else
     exit 0
 fi
 
-if [ -f /etc/openstack-control-script-config/horizon-installed ]
+if [[ -f /etc/openstack-control-script-config/horizon-installed ]]
 then
     echo ""
     echo "### This module was already completed. Exiting !"
@@ -115,7 +115,7 @@ eof
     yum -y install python2-XStatic-roboto-fontface roboto-fontface-common roboto-fontface-fonts mdi-common mdi-fonts python2-XStatic-mdi
     yum -y reinstall python2-XStatic-roboto-fontface roboto-fontface-common roboto-fontface-fonts mdi-common mdi-fonts python2-XStatic-mdi
 
-    if [ ! -f /usr/share/openstack-dashboard/static/horizon/lib/roboto_fontface/fonts/Roboto-Regular.woff ]
+    if [[ ! -f /usr/share/openstack-dashboard/static/horizon/lib/roboto_fontface/fonts/Roboto-Regular.woff ]]
     then
         mkdir -p /usr/share/openstack-dashboard/static/horizon/lib/roboto_fontface/fonts
         mkdir -p /usr/share/openstack-dashboard/openstack_dashboard/static/horizon/lib/font-awesome/fonts
@@ -124,7 +124,7 @@ eof
         cp -v /usr/share/fonts/fontawesome/* /usr/share/openstack-dashboard/openstack_dashboard/static/horizon/lib/font-awesome/fonts
     fi
 
-    if [ ! -f /usr/share/openstack-dashboard/static/horizon/lib/mdi/fonts/materialdesignicons-webfont.woff ]
+    if [[ ! -f /usr/share/openstack-dashboard/static/horizon/lib/mdi/fonts/materialdesignicons-webfont.woff ]]
     then
         mkdir -p /usr/share/openstack-dashboard/static/horizon/lib/mdi/fonts
         mkdir -p /usr/share/openstack-dashboard/openstack_dashboard/static/horizon/lib/mdi/fonts
@@ -159,12 +159,9 @@ verify_horizon()
 main()
 {
     echo "INSTALL_HORIZON = $INSTALL_HORIZON"
-    if [ $INSTALL_HORIZON == "yes" ]
-    then
-        install_configure_horizon
-        verify_horizon
-        date > /etc/openstack-control-script-config/horizon-installed
-    fi
+    install_configure_horizon
+    verify_horizon
+    date > /etc/openstack-control-script-config/horizon-installed
 }
 
 main

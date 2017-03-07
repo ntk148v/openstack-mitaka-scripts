@@ -10,7 +10,7 @@
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
-if [ -f /etc/openstack-control-script-config/main-config.rc ]
+if [[ -f /etc/openstack-control-script-config/main-config.rc ]]
 then
 	source /etc/openstack-control-script-config/main-config.rc
 else
@@ -18,6 +18,13 @@ else
 	echo ""
 	exit 0
 fi
+
+if [[ -f /etc/openstack-control-script-config/environment-installed ]]
+then
+	echo "This module was installed. Exiting"
+	exit 0
+fi
+
 
 configure_name_resolution()
 {
@@ -81,7 +88,7 @@ install_configure_ntp()
 install_openstack_packages()
 {
 	echo "### 3. Enable the OpenStack repository"
-	if [ $USE_PRIVATE_REPOS == "no" ]
+	if [[ $USE_PRIVATE_REPOS == "no" ]]
 	then
 		yum -y install centos-release-openstack-mitaka
 	fi
@@ -159,7 +166,7 @@ main(){
 	install_configure_sql_database
 	install_rabbitmq
 	install_memcaced
-	date > /etc/openstack-control-script-config/enviroment-installed
+	date > /etc/openstack-control-script-config/environment-installed
 }
 
 main

@@ -10,12 +10,18 @@
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
-if [ -f /etc/openstack-control-script-config/main-config.rc ]
+if [[ -f /etc/openstack-control-script-config/main-config.rc ]]
 then
 	source /etc/openstack-control-script-config/main-config.rc
 else
 	echo " ERROR:Can't access my config file. Aborting !"
 	echo ""
+	exit 0
+fi
+
+if [[ -f /etc/openstack-control-script-config/environment-compute-installed ]]
+then
+	echo "This module was installed. Exiting"
 	exit 0
 fi
 
@@ -83,7 +89,10 @@ install_openstack_packages()
 {
 
 	echo "### 3. Enable the OpenStack repository¶"
-	yum -y install centos-release-openstack-mitaka
+	if [[ $USE_PRIVATE_REPOS == "no" ]]
+	then
+		yum -y install centos-release-openstack-mitaka
+	fi
 	yum -y update
 	yum -y upgrade
 	yum -y install python-openstackclient openstack-selinux crudini
@@ -93,7 +102,7 @@ main(){
 	configure_name_resolution
 	install_configure_ntp
 	install_openstack_packages
-	date > /etc/openstack-control-script-config/enviroment-compute-installed
+	date > /etc/openstack-control-script-config/environment-compute-installed
 
     # Create OpenStack client environment scripts
 cat > $ADMIN_RC_FILE <<eof

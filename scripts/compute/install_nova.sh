@@ -10,7 +10,7 @@
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
-if [ -f /etc/openstack-control-script-config/main-config.rc ]
+if [[ -f /etc/openstack-control-script-config/main-config.rc ]]
 then
     source /etc/openstack-control-script-config/main-config.rc
 else
@@ -19,7 +19,7 @@ else
     exit 0
 fi
 
-if [ -f /etc/openstack-control-script-config/nova-compute-installed ]
+if [[ -f /etc/openstack-control-script-config/nova-compute-installed ]]
 then
     echo ""
     echo "### This module was already completed. Exiting !"
@@ -82,7 +82,7 @@ install_configure_nova()
     # Libvirt Configuration
     # 
     kvm_possible=`egrep -c '(vmx|svm)' /proc/cpuinfo`
-    if [ $kvm_possible == "0" ]
+    if [[ $kvm_possible == "0" ]]
     then
         echo ""
         echo "### WARNING !. This server does not support KVM"

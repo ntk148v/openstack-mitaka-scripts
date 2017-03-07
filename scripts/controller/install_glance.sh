@@ -10,7 +10,7 @@
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
-if [ -f /etc/openstack-control-script-config/main-config.rc ]
+if [[ -f /etc/openstack-control-script-config/main-config.rc ]]
 then
 	source /etc/openstack-control-script-config/main-config.rc
 else
@@ -19,7 +19,7 @@ else
 	exit 0
 fi
 
-if [ -f /etc/openstack-control-script-config/glance-installed ]
+if [[ -f /etc/openstack-control-script-config/glance-installed ]]
 then
 	echo ""
 	echo "### This module was already completed. Exiting !"
@@ -44,7 +44,7 @@ create_glance_identity()
 {
 	source /etc/openstack-control-script-config/$ADMIN_RC_FILE
 	echo "### 2. Create Glance user, service and endpoint"
-	if [ -f date > /etc/openstack-control-script-config/keystone-extra-idents-glance ]
+	if [[ -f  /etc/openstack-control-script-config/keystone-extra-idents-glance ]]
 	then
 		echo ""
 		echo "### Glance Identity was Done. Pass!"
