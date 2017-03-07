@@ -162,31 +162,9 @@ install_configure_nova()
 	echo ""
 	echo "### 4. Populate the Compute databases"
 	echo ""
-	su -s /bin/sh -c "nova-manage api_db sync" $NOVA_DBUSER
-	if [[ $check -gt 2 ]]
-	then
-		echo ""
-		echo "### Import Database Nova: OK"
-		echo ""
-	else
-		echo ""
-		echo "### Error: Import Database Nova API"
-		echo ""
-	fi
-	clear
 
+	su -s /bin/sh -c "nova-manage api_db sync" $NOVA_DBUSER
 	su -s /bin/sh -c "nova-manage db sync" $NOVA_DBUSER
-	if [[ $check -gt 2 ]]
-	then
-		echo ""
-		echo "### Import Database Nova: OK"
-		echo ""
-	else
-		echo ""
-		echo "### Error: Import Database Nova"
-		echo ""
-	fi
-	clear
 
 	sync
 	sleep 5

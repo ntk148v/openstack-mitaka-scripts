@@ -243,16 +243,6 @@ install_configure_neutron()
 	ln -s /etc/neutron/plugins/ml2/ml2_conf.ini /etc/neutron/plugin.ini
 	su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf \
  		--config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
-  	if [[ $check -gt 2 ]]
-	then
-		echo ""
-		echo "### Import Database Neutron: OK"
-		echo ""
-	else
-		echo ""
-		echo "### Error: Import Database Neutron"
-		echo ""
-	fi
 
 	systemctl restart openstack-nova-api.service
 

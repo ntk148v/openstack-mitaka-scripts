@@ -129,17 +129,6 @@ install_configure_glance()
 	echo "### 4. Populate the Image service db"
 	echo ""
 	su -s /bin/sh -c "glance-manage db_sync" glance
-	if [[ $check -gt 2 ]]
-	then
-		echo ""
-		echo "### Import Database Glance: OK"
-		echo ""
-	else
-		echo ""
-		echo "### Error: Import Database Glance"
-		echo ""
-	fi
-	clear
 
 	systemctl enable openstack-glance-api.service \
 		openstack-glance-registry.service
