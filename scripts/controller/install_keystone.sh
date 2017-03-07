@@ -70,7 +70,7 @@ configure_keystone()
 configure_http()
 {
 	echo "### 4. Configure HTTPD Server"
-	sed -i -e 's/.*ServerName.*/ServerName $CONTROLLER_NODES/g' /etc/httpd/conf/httpd.conf
+	sed -i -e "s/.*ServerName.*/ServerName $CONTROLLER_NODES/g" /etc/httpd/conf/httpd.conf
 	rm /etc/httpd/conf.d/wsgi-keystone.conf
 	cp /etc/openstack-control-script-config/wsgi-keystone.conf /etc/httpd/conf.d/
 	systemctl enable httpd.service
@@ -81,7 +81,7 @@ configure_http()
 create_service_entity_api_enpoints_user_role_domain()
 {
 	echo "### 5. Create the service entity and API endpoints"
-	export OS_TOKEN=$ADMIN_TOKEN
+	export OS_TOKEN=$TOKEN_PASS
 	export OS_URL=http://$CONTROLLER_NODES:35357/v3
 	export OS_IDENTITY_API_VERSION=3
 	while true
