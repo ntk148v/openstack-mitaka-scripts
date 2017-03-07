@@ -82,7 +82,7 @@ create_service_entity_api_enpoints_user_role_domain()
 {
 	echo "### 5. Create the service entity and API endpoints"
 	export OS_TOKEN=$ADMIN_TOKEN
-	export OS_URL="http://$CONTROLLER_NODES:35357/v3"
+	export OS_URL=http://$CONTROLLER_NODES:35357/v3
 	export OS_IDENTITY_API_VERSION=3
 	while true
 	do
