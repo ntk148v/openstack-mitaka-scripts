@@ -162,7 +162,7 @@ install_configure_nova()
 	echo ""
 	echo "### 4. Populate the Compute databases"
 	echo ""
-	su -s /bin/sh -c "nova-manage api_db sync" 
+	su -s /bin/sh -c "nova-manage api_db sync" $NOVA_DBUSER
 	if [[ $check -gt 2 ]]
 	then
 		echo ""
@@ -175,7 +175,7 @@ install_configure_nova()
 	fi
 	clear
 
-	su -s /bin/sh -c "nova-manage db sync" nova
+	su -s /bin/sh -c "nova-manage db sync" $NOVA_DBUSER
 	if [[ $check -gt 2 ]]
 	then
 		echo ""
