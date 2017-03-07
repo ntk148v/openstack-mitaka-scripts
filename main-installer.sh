@@ -351,7 +351,7 @@ main()
                     #
                     # Install Neutron service with OpenVSwitch
                     #
-                    $TOP_DIR/scripts/controller/install_neutron_openvswitch.sh $NODE_TYPE
+                    $TOP_DIR/scripts/compute/install_neutron_openvswitch.sh $NODE_TYPE
 
                     if [[ -f /etc/openstack-control-script-config/neutron-openvswitch-$NODE_TYPE-installed ]]
                     then
@@ -369,7 +369,7 @@ main()
                     #
                     # Install Neutron service with LinuxBridge
                     #
-                    $TOP_DIR/scripts/controller/install_neutron_linuxbridge.sh $NODE_TYPE
+                    $TOP_DIR/scripts/compute/install_neutron_linuxbridge.sh $NODE_TYPE
                     if [[ -f /etc/openstack-control-script-config/neutron-linuxbridge-$NODE_TYPE-installed ]]
                     then
                         echo ""
