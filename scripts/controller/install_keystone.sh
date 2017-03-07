@@ -60,7 +60,7 @@ configure_keystone()
 {
 	echo "### 3. Configure Keystone"
 	crudini --set /etc/keystone/keystone.conf DEFAULT admin_token $TOKEN_PASS
-	crudini --set /etc/keystone/keystone.conf DEFAULT connection mysql+pymysql://$KEYSTONE_DBUSER:$KEYSTONE_DBPASS@$CONTROLLER_NODES/$KEYSTONE_DBNAME
+	crudini --set /etc/keystone/keystone.conf database connection mysql+pymysql://$KEYSTONE_DBUSER:$KEYSTONE_DBPASS@$CONTROLLER_NODES/$KEYSTONE_DBNAME
 	crudini --set /etc/keystone/keystone.conf token provider fernet
 	su -s /bin/sh -c "keystone-manage db_sync" $KEYSTONE_DBNAME
 	keystone-manage fernet_setup --keystone-user $KEYSTONE_USER --keystone-group keystone

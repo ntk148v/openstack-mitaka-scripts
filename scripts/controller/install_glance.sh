@@ -86,7 +86,9 @@ install_configure_glance()
  	#
  	crudini --set /etc/glance/glance-api.conf DEFAULT debug False
  	crudini --set /etc/glance/glance-api.conf glance_store default_store file
-	crudini --set /etc/glance/glance-api.conf glance_store stores "file,http"
+	crudini --set /etc/glance/glance-api.conf glance_store stores file,http,cinder
+	crudini --set /etc/glance/glance-api.conf DEFAULT show_multiple_locations True
+	crudini --set /etc/glance/glance-api.conf DEFAULT show_image_direct_url True
 	crudini --set /etc/glance/glance-api.conf glance_store filesystem_store_datadir /var/lib/glance/images/
 	crudini --set /etc/glance/glance-api.conf DEFAULT bind_host 0.0.0.0
 	crudini --set /etc/glance/glance-api.conf DEFAULT bind_port 9292
