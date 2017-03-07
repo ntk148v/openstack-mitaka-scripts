@@ -45,7 +45,7 @@ create_database()
 
 create_nova_identity()
 {
-	source $ADMIN_RC_FILE
+	source /etc/openstack-control-script-config/$ADMIN_RC_FILE
 	echo "### 2. Create Nova user, service and endpoint"
 	if [ -f date > /etc/openstack-control-script-config/keystone-extra-idents-nova ]
 	then
@@ -118,7 +118,7 @@ install_configure_nova()
 		echo "### We will have to use QEMU instead of KVM"
 		echo "### Performance will be poor"
 		echo ""
-		source $ADMIN_RC_FILE
+		source /etc/openstack-control-script-config/$ADMIN_RC_FILE
 		crudini --set /etc/nova/nova.conf libvirt virt_type qemu
 		setsebool -P virt_use_execmem on
 		ln -s -f /usr/libexec/qemu-kvm /usr/bin/qemu-system-x86_64
@@ -212,7 +212,7 @@ verify_nova()
 	echo ""
 	echo "### 5. Verify Nova Installation"
 	echo ""
-	source $ADMIN_RC_FILE
+	source /etc/openstack-control-script-config/$ADMIN_RC_FILE
 	echo ""
 	echo "- List service components to verify successful launch and registration of each process"
 	echo ""

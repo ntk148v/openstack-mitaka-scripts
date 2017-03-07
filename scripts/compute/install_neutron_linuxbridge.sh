@@ -133,7 +133,7 @@ verify_neutron()
 	echo ""
 	echo "### 2. Verify Neutron installation"
 	echo ""
-	source $ADMIN_RC_FILE
+	source /etc/openstack-control-script-config/$ADMIN_RC_FILE
 	echo "- Network agent list"
 	openstack network agent list
 	echo "- List loaded extension"

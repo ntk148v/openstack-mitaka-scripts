@@ -42,7 +42,7 @@ create_database()
 
 create_glance_identity()
 {
-	source $ADMIN_RC_FILE
+	source /etc/openstack-control-script-config/$ADMIN_RC_FILE
 	echo "### 2. Create Glance user, service and endpoint"
 	if [ -f date > /etc/openstack-control-script-config/keystone-extra-idents-glance ]
 	then
@@ -157,7 +157,7 @@ verify_glance()
 	echo ""
 	echo "### 5. Verify Glance installation"
 	echo ""
-	source $ADMIN_RC_FILE
+	source /etc/openstack-control-script-config/$ADMIN_RC_FILE
 	wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
 	echo "- Create Image Cirros"
 	openstack image create "cirros" \

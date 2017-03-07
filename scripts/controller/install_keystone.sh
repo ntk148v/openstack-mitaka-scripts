@@ -148,7 +148,19 @@ eof
 	chmod +x $DEMO_RC_FILE
 
 	unset OS_TOKEN OS_URL OS_IDENTITY_API_VERSION
-	source $ADMIN_RC_FILE
+	if [ -f /etc/openstack-control-script-config/$ADMIN_RC_FILE ]
+	then
+		rm /etc/openstack-control-script-config/$ADMIN_RC_FILE
+	fi
+
+	if [ -f /etc/openstack-control-script-config/$DEMO_RC_FILE ]
+	then
+		rm /etc/openstack-control-script-config/$DEMO_RC_FILE
+	fi
+
+	cp $ADMIN_RC_FILE /etc/openstack-control-script-config/
+	cp $DEMO_RC_FILE /etc/openstack-control-script-config/
+	source /etc/openstack-control-script-config/$ADMIN_RC_FILE
 	openstack token issue
 	source $DEMO_RC_FILE
 	openstack token issue

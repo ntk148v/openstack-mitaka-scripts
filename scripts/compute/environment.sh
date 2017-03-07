@@ -94,6 +94,44 @@ main(){
 	install_configure_ntp
 	install_openstack_packages
 	date > /etc/openstack-control-script-config/enviroment-compute-installed
+
+    # Create OpenStack client environment scripts
+cat > $ADMIN_RC_FILE <<eof
+export OS_PROJECT_DOMAIN_NAME=default
+export OS_USER_DOMAIN_NAME=default
+export OS_PROJECT_NAME=admin
+export OS_USERNAME=admin
+export OS_PASSWORD=$ADMIN_PASS
+export OS_AUTH_URL=http://$CONTROLLER_NODES:35357/v3
+export OS_IDENTITY_API_VERSION=3
+export OS_IMAGE_API_VERSION=2
+eof
+	chmod +x $ADMIN_RC_FILE
+cat > $DEMO_RC_FILE <<eof
+export OS_PROJECT_DOMAIN_NAME=default
+export OS_USER_DOMAIN_NAME=default
+export OS_PROJECT_NAME=demo
+export OS_USERNAME=demo
+export OS_PASSWORD=$DEMO_PASS
+export OS_AUTH_URL=http://$CONTROLLER_NODES:5000/v3
+export OS_IDENTITY_API_VERSION=3
+export OS_IMAGE_API_VERSION=2
+eof
+	chmod +x $DEMO_RC_FILE
+
+	unset OS_TOKEN OS_URL OS_IDENTITY_API_VERSION
+	if [ -f /etc/openstack-control-script-config/$ADMIN_RC_FILE ]
+	then
+		rm /etc/openstack-control-script-config/$ADMIN_RC_FILE
+	fi
+
+	if [ -f /etc/openstack-control-script-config/$DEMO_RC_FILE ]
+	then
+		rm /etc/openstack-control-script-config/$DEMO_RC_FILE
+	fi
+
+	cp $ADMIN_RC_FILE /etc/openstack-control-script-config/
+	cp $DEMO_RC_FILE /etc/openstack-control-script-config/
 }
 
 main
