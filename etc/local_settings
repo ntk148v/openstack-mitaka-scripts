@@ -9,9 +9,8 @@ DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 WEBROOT = '/dashboard/'
 ALLOWED_HOSTS = ['*', ]
-LOCAL_PATH = os.path.dirname(os.path.abspath(__file__))
-SECRET_KEY = secret_key.generate_or_read_from_file(
-    os.path.join(LOCAL_PATH, '.secret_key_store'))
+LOCAL_PATH = '/tmp'
+SECRET_KEY='e1855b2307124a3788ab'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 

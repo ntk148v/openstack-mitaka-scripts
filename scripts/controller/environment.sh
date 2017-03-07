@@ -148,6 +148,7 @@ install_memcaced()
 {
 	echo "### 6. Install and create user with memcached"
 	yum -y install memcached python-memcached
+	sed -i "s/127.0.0.1/$CONTROLLER_NODES_IP/g" /etc/sysconfig/memcached
 	if [[ $? -eq 0 ]]
 	then
 		systemctl enable memcached.service

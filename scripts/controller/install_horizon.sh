@@ -33,21 +33,22 @@ install_configure_horizon()
     echo "### 1. Install and configure Dashboard"
     echo ""
     yum -y install openstack-dashboard
-    cp /etc/openstack-control-script-config/local_settings.py /etc/openstack-dashboard/local_settings.py
+    mv /etc/openstack-dashboard/local_settings /etc/openstack-dashboard/local_settings.bak
+    cp /etc/openstack-control-script-config/local_settings /etc/openstack-dashboard/local_settings
     
     #
     # Change Time zone
     # 
     
-    sed -r -i "s/CUSTOM_TIMEZONE/$TIMEZONE/g" /etc/openstack-dashboard/local_settings.py
-    sed -r -i "s/_CONTROLLER/$CONTROLLER_NODES/g" /etc/openstack-dashboard/local_settings.py  
+    sed -r -i "s/CUSTOM_TIMEZONE/$TIMEZONE/g" /etc/openstack-dashboard/local_settings
+    sed -r -i "s/_CONTROLLER/$CONTROLLER_NODES/g" /etc/openstack-dashboard/local_settings  
 
     #
     # If you chose networking option 1, disable support for layer-3 networking services:
     # 
     case $NETWORK_OPT in
     provider)
-        cat <<eof >> /etc/openstack-dashboard/local_settings.py
+        cat <<eof >> /etc/openstack-dashboard/local_settings
 OPENSTACK_NEUTRON_NETWORK = {
     'enable_router': False,
     'enable_quotas': False,
@@ -67,7 +68,7 @@ OPENSTACK_NEUTRON_NETWORK = {
 eof
         ;;
     self-service)
-        cat <<eof >> /etc/openstack-dashboard/local_settings.py
+        cat <<eof >> /etc/openstack-dashboard/local_settings
 OPENSTACK_NEUTRON_NETWORK = {
     'enable_router': True,
     'enable_quotas': True,
