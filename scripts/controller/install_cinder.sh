@@ -40,7 +40,7 @@ create_database()
     sync
 }
 
-create_Cinder_identity()
+create_cinder_identity()
 {
     source /etc/openstack-control-script-config/$ADMIN_RC_FILE
     echo "### 2. Create Cinder user, service and endpoint"
