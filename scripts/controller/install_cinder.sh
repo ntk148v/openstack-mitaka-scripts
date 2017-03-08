@@ -57,7 +57,7 @@ create_cinder_identity()
         echo "- Cinder Service"
         openstack service create --name $CINDER_SERVICE \
             --description "OpenStack Block Storage" volume
-        openstack service create_--name $CINDER_SERVICE_V2 \
+        openstack service create --name $CINDER_SERVICE_V2 \
             --description "Openstack Block Storage" volumev2
         echo "- Cinder Endpoints"
         openstack endpoint create --region RegionOne \
