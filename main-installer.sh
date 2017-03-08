@@ -48,7 +48,7 @@ main()
     echo ""
     echo "######################################################################################"
     echo "OPENSTACK UNATTENDED INSTALLER"
-    echo "Flavor: OpenStack NEWTON for Centos 7"
+    echo "Flavor: OpenStack Mitaka for Centos 7"
     echo "Made by: Kien Nguyen."
     echo "E-Mail: ntk148v@gmail.com"
     echo "Version 1.0.0 March 1, 2017"
