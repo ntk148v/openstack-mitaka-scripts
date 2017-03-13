@@ -71,12 +71,6 @@ main()
     sleep 5
     sync
 
-    enable_private_repos
-
-    sync
-    sleep 5
-    sync
-
     #
     # Check supper user
     #
@@ -109,6 +103,16 @@ main()
         echo ""
         exit 1
     fi
+
+    #
+    # Enable private repository
+    # 
+
+    enable_private_repos
+
+    sync
+    sleep 5
+    sync
 
     NODE_TYPE=$1
 
