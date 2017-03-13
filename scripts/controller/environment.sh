@@ -75,7 +75,10 @@ install_configure_ntp()
 	if [[ $? -eq 0 ]]
 	then
 		sed -i '/server/d' /etc/chrony.conf
-		echo "server $NTP_SERVER iburst" >> /etc/chrony.conf
+		for NTP_SERVER in $NTP_SERVERS
+		do
+			echo "server $NTP_SERVER iburst" >> /etc/chrony.conf
+		done
 		systemctl enable chronyd.service
 		systemctl start chronyd.service
 		chronyc sources
