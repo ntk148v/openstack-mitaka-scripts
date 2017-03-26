@@ -1,6 +1,6 @@
-#Installation OpenStack Mitaka - CentOS 7
+# Installation OpenStack Mitaka - CentOS 7
 
-##Introduction
+## Introduction
 
 - This installer was made to automate the tasks of creating a virtualization infrastructure based on OpenStack Mitaka release.
 - Testing in CentOS 7 only.
@@ -14,7 +14,7 @@
 	+ Cinder (controller only)
 	+ Horizon
 
-##How to use
+## How to use
 
 1. Read everything you can about **OpenStack** and its installation. [More details.](https://docs.openstack.org/mitaka/install-guide-rdo/)
 
