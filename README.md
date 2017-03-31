@@ -39,12 +39,10 @@
 	# ./main-installer.sh controller
 	```
 
-6. In compute node `compute1` (It depends on COMPUTE_NODES config in your `main-config.rc`.
-   For e.x, COMPUTE_NODES="test-compute1 compute2", run `./main-installer.sh test-compute1`
-   in the host that will be the first compute node.), run command with root user:
+6. In compute node `compute1`, run command with root user:
 
 	```bash
-	# ./main-installer.sh compute1
+	# ./main-installer.sh compute
 	```
 
 	Repeat it in `compute2`.

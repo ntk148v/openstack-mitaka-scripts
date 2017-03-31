@@ -314,8 +314,16 @@ main()
         #
         # Install Compute Nodes
         #
+
+        if [[ -n $COMPUTE_NODES == *$HOSTNAME* ]]
+        then
+            echo ""
+            echo "### WRONG CONFIG - $HOSTNAME NOT IN $COMPUTE_NODES"
+            echo ""
+            exit 0
+        fi
          
-        if [[ -z $COMPUTE_NODES_IP ]] && [[$COMPUTE_NODES == *$NODE_TYPE* ]]
+        if [[ -z $COMPUTE_NODES_IP ]] && [[$COMPUTE_NODES == *$HOSTNAME* ]]
         then
             echo ""
             echo "### You don't setup any compute nodes."
@@ -323,7 +331,7 @@ main()
             echo ""
         else
             echo ""
-            echo "### INSTALL COMPUTE NODES - $NODE_TYPE"
+            echo "### INSTALL COMPUTE NODES - $HOSTNAME"
             echo ""
             sync
             sleep 5
@@ -338,11 +346,11 @@ main()
             if [[  -f /etc/openstack-control-script-config/environment-compute-installed  ]]
             then
                 echo ""
-                echo "### OPENSTACK ENVIRONMENT COMPUTE $NODE_TYPE INSTALLED"
+                echo "### OPENSTACK ENVIRONMENT COMPUTE $HOSTNAME INSTALLED"
                 echo ""
             else
                 echo ""
-                echo "### ERROR: OPENSTACK ENVIRONMENT COMPUTE $NODE_TYPE INSTALLATION FAILED. ABORTING !!"
+                echo "### ERROR: OPENSTACK ENVIRONMENT COMPUTE $HOSTNAME INSTALLATION FAILED. ABORTING !!"
                 echo ""
                 exit 0
             fi
@@ -351,15 +359,15 @@ main()
             # Install Nova service
             # 
             
-            $TOP_DIR/scripts/compute/install_nova.sh $NODE_TYPE
-            if [[ -f /etc/openstack-control-script-config/nova-$NODE_TYPE-installed ]]
+            $TOP_DIR/scripts/compute/install_nova.sh $HOSTNAME
+            if [[ -f /etc/openstack-control-script-config/nova-$HOSTNAME-installed ]]
             then
                 echo ""
-                echo "### OPENSTACK NOVA COMPUTE $NODE_TYPE INSTALLED"
+                echo "### OPENSTACK NOVA COMPUTE $HOSTNAME INSTALLED"
                 echo ""
             else
                 echo ""
-                echo "### ERROR: OPENSTACK NOVA COMPUTE $NODE_TYPE INSTALLATION FAILED. ABORTING !!"
+                echo "### ERROR: OPENSTACK NOVA COMPUTE $HOSTNAME INSTALLATION FAILED. ABORTING !!"
                 echo ""
                 exit 0
             fi
@@ -375,16 +383,16 @@ main()
                     #
                     # Install Neutron service with OpenVSwitch
                     #
-                    $TOP_DIR/scripts/compute/install_neutron_openvswitch.sh $NODE_TYPE
+                    $TOP_DIR/scripts/compute/install_neutron_openvswitch.sh $HOSTNAME
 
-                    if [[ -f /etc/openstack-control-script-config/neutron-openvswitch-$NODE_TYPE-installed ]]
+                    if [[ -f /etc/openstack-control-script-config/neutron-openvswitch-$HOSTNAME-installed ]]
                     then
                         echo ""
-                        echo "### OPENSTACK NEUTRON $NODE_TYPE INSTALLED"
+                        echo "### OPENSTACK NEUTRON $HOSTNAME INSTALLED"
                         echo ""
                     else
                         echo ""
-                        echo "### ERROR: OPENSTACK NEUTRON $NODE_TYPE INSTALLATION FAILED. ABORTING !!"
+                        echo "### ERROR: OPENSTACK NEUTRON $HOSTNAME INSTALLATION FAILED. ABORTING !!"
                         echo ""
                         exit 0
                     fi
@@ -393,15 +401,15 @@ main()
                     #
                     # Install Neutron service with LinuxBridge
                     #
-                    $TOP_DIR/scripts/compute/install_neutron_linuxbridge.sh $NODE_TYPE
-                    if [[ -f /etc/openstack-control-script-config/neutron-linuxbridge-$NODE_TYPE-installed ]]
+                    $TOP_DIR/scripts/compute/install_neutron_linuxbridge.sh $HOSTNAME
+                    if [[ -f /etc/openstack-control-script-config/neutron-linuxbridge-$HOSTNAME-installed ]]
                     then
                         echo ""
-                        echo "### OPENSTACK NEUTRON $NODE_TYPE INSTALLED"
+                        echo "### OPENSTACK NEUTRON $HOSTNAME INSTALLED"
                         echo ""
                     else
                         echo ""
-                        echo "### ERROR: OPENSTACK NEUTRON $NODE_TYPE INSTALLATION FAILED. ABORTING !!"
+                        echo "### ERROR: OPENSTACK NEUTRON $HOSTNAME INSTALLATION FAILED. ABORTING !!"
                         echo ""
                         exit 0
                     fi
@@ -423,7 +431,7 @@ main()
         ;;
     *)
         echo ""
-        echo "### Usage: ./main-installer.sh controller|compute1|compute2... "
+        echo "### Usage: ./main-installer.sh controller|compute... "
         echo ""
         exit 0
         ;;
