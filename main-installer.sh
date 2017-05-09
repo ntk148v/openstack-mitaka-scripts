@@ -315,7 +315,7 @@ main()
         # Install Compute Nodes
         #
 
-        if [[ -n $COMPUTE_NODES == *$HOSTNAME* ]]
+        if [[ -z $COMPUTE_NODES ]] && ![[ $COMPUTE_NODES == *$HOSTNAME* ]]
         then
             echo ""
             echo "### WRONG CONFIG - $HOSTNAME NOT IN $COMPUTE_NODES"
