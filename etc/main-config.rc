@@ -12,7 +12,7 @@
 # Use Private Repository
 # 
 
-USE_PRIVATE_REPOS="yes"
+USE_PRIVATE_REPOS="no"
 
 DEFAULT_PASS="P@ssw0rd"
 
